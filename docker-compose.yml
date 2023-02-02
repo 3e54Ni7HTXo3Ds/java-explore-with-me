@@ -8,7 +8,7 @@ services:
       - stats-db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm-stats
-      - SPRING_DATASOURCE_USERNAME=emw
+      - SPRING_DATASOURCE_USERNAME=ewm
       - SPRING_DATASOURCE_PASSWORD=root
 
   stats-db:
@@ -18,7 +18,7 @@ services:
       # переменные окружения
     environment:
         - POSTGRES_DB=ewm-stats
-        - POSTGRES_USER=emw
+        - POSTGRES_USER=ewm
         - POSTGRES_PASSWORD=root
 
   ewm-service:
@@ -29,8 +29,8 @@ services:
        - ewm-db
        - stats-server
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm
-      - SPRING_DATASOURCE_USERNAME=emw
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
+      - SPRING_DATASOURCE_USERNAME=ewm
       - SPRING_DATASOURCE_PASSWORD=root
 
   ewm-db:
@@ -40,5 +40,5 @@ services:
       # переменные окружения
     environment:
       - POSTGRES_DB=ewm
-      - POSTGRES_USER=emw
+      - POSTGRES_USER=ewm
       - POSTGRES_PASSWORD=root
