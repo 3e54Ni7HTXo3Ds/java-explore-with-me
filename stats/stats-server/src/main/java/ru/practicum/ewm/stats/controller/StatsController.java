@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.stats.dto.HitRequestDto;
-import ru.practicum.ewm.stats.dto.HitResponseDto;
 import ru.practicum.ewm.stats.service.StatsService;
 
 import javax.validation.Valid;
@@ -21,7 +20,7 @@ public class StatsController {
     private final StatsService statsService;
 
     @PostMapping("/hit")
-    @ResponseStatus (HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.CREATED)
     public void createHit(
             @Valid @RequestBody HitRequestDto hitRequestDto) {
         log.info("Creating hit in stats service");
