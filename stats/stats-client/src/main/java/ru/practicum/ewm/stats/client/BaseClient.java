@@ -17,32 +17,35 @@ public class BaseClient {
         this.rest = rest;
     }
 
-
     protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
-        return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
+        return makeAndSendRequest(path, parameters);
+    }
+
+    private ResponseEntity<Object> makeAndSendRequest(String path, Map<String, Object> parameters) {
+        return null;
     }
 
     protected <T> ResponseEntity<Object> post(String path, @Nullable Map<String, Object> parameters, T body) {
-        return makeAndSendRequest(HttpMethod.POST, path, parameters, body);
+        return makeAndSendRequest(path, parameters, body);
     }
 
 
-    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
-        assert body != null;
+    private <T> ResponseEntity<Object> makeAndSendRequest(String path, @Nullable Map<String, Object> parameters, T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body);
 
         ResponseEntity<Object> response;
         try {
             if (parameters != null) {
-                response = rest.exchange(path, method, requestEntity, Object.class, parameters);
+                response = rest.exchange(path, HttpMethod.POST, requestEntity, Object.class, parameters);
             } else {
-                response = rest.exchange(path, method, requestEntity, Object.class);
+                response = rest.exchange(path, HttpMethod.POST, requestEntity, Object.class);
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
         }
         return prepareResponse(response);
     }
+
 
     private static ResponseEntity<Object> prepareResponse(ResponseEntity<Object> response) {
         if (response.getStatusCode().is2xxSuccessful()) {
