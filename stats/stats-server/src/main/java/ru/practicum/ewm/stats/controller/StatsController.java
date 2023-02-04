@@ -32,7 +32,7 @@ public class StatsController {
     public List<HitResponseDto> getHits(
             @RequestParam String start,
             @RequestParam String end,
-            @RequestParam List<String> uris,
+            @RequestParam(required = false) List<String> uris,
             @RequestParam(required = false, defaultValue = "false") boolean unique) {
         log.info("Getting hits from stats service with start={}, end={}, uris={}, unique={}", start, end, uris, unique);
         return statsService.get(start, end, uris, unique);

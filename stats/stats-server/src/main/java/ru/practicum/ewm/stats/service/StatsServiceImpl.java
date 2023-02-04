@@ -28,7 +28,16 @@ public class StatsServiceImpl implements StatsService {
         LocalDateTime startTime = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LocalDateTime endTime = LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-        return statsRepository.findHitsByDate(startTime, endTime, uris);
-
+        if (unique) {
+            if (uris == null || uris.isEmpty()) {
+                return statsRepository.findAllUniqueHits(startTime, endTime);
+            }
+            return statsRepository.findAllUniqueHitsByUri(startTime, endTime, uris);
+        } else {
+            if (uris == null || uris.isEmpty()) {
+                return statsRepository.findAllHits(startTime, endTime);
+            }
+            return statsRepository.findAllHitsByUri(startTime, endTime, uris);
+        }
     }
 }
