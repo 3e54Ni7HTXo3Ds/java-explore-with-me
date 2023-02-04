@@ -28,6 +28,7 @@ public class BaseClient {
 
 
     private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
+        assert body != null;
         HttpEntity<T> requestEntity = new HttpEntity<>(body);
 
         ResponseEntity<Object> response;
