@@ -6,9 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.stats.dto.HitRequestDto;
+import ru.practicum.ewm.stats.dto.HitResponseDto;
 import ru.practicum.ewm.stats.service.StatsService;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @Component
@@ -21,10 +23,18 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createHit(
-            @Valid @RequestBody HitRequestDto hitRequestDto) {
+    public void create(@Valid @RequestBody HitRequestDto hitRequestDto) {
         log.info("Creating hit in stats service");
         statsService.create(hitRequestDto);
     }
 
+    @GetMapping("/stats")
+    public List<HitResponseDto> getHits(
+            @RequestParam String start,
+            @RequestParam String end,
+            @RequestParam List<String> uris,
+            @RequestParam(required = false, defaultValue = "false") boolean unique) {
+        log.info("Getting hits from stats service with start={}, end={}, uris={}, unique={}", start, end, uris, unique);
+        return statsService.get(start, end, uris, unique);
+    }
 }
