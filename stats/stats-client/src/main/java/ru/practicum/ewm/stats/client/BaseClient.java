@@ -1,6 +1,7 @@
 package ru.practicum.ewm.stats.client;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -18,34 +19,28 @@ public class BaseClient {
     }
 
     protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
-        return makeAndSendRequest(path, parameters);
+        return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
 
-    private ResponseEntity<Object> makeAndSendRequest(String path, Map<String, Object> parameters) {
-        return null;
+    protected <T> ResponseEntity<Object> post(String path, T body) {
+        return makeAndSendRequest(HttpMethod.POST, path, null, body);
     }
 
-    protected <T> ResponseEntity<Object> post(String path, @Nullable Map<String, Object> parameters, T body) {
-        return makeAndSendRequest(path, parameters, body);
-    }
-
-
-    private <T> ResponseEntity<Object> makeAndSendRequest(String path, @Nullable Map<String, Object> parameters, T body) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(body);
+    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
+        HttpEntity<T> requestEntity = new HttpEntity<>(body, new HttpHeaders());
 
         ResponseEntity<Object> response;
         try {
             if (parameters != null) {
-                response = rest.exchange(path, HttpMethod.POST, requestEntity, Object.class, parameters);
+                response = rest.exchange(path, method, requestEntity, Object.class, parameters);
             } else {
-                response = rest.exchange(path, HttpMethod.POST, requestEntity, Object.class);
+                response = rest.exchange(path, method, requestEntity, Object.class);
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
         }
         return prepareResponse(response);
     }
-
 
     private static ResponseEntity<Object> prepareResponse(ResponseEntity<Object> response) {
         if (response.getStatusCode().is2xxSuccessful()) {
