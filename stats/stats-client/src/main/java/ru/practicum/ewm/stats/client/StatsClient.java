@@ -25,8 +25,8 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createHit(HttpServletRequest httpServletRequest) {
-        return post("/hit",
+    public void createHit(HttpServletRequest httpServletRequest) {
+        post("/hit",
                 new HitRequestDto(
                         "ewm-main-service",
                         httpServletRequest.getRequestURI(),
