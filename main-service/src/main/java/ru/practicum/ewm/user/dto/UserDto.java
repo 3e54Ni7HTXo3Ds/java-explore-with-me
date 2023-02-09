@@ -1,19 +1,22 @@
 package ru.practicum.ewm.user.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
 
     private Long id; // — уникальный идентификатор пользователя;
+    @NotNull
+    @NotBlank
     private String name;// — имя или логин пользователя;
-  //  @Email
+    @Email
     private String email;/* — адрес электронной почты ( два пользователя не могут
             иметь одинаковый адрес электронной почты).*/
 }
