@@ -8,6 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 
+
 @Getter
 @Setter
 @AllArgsConstructor

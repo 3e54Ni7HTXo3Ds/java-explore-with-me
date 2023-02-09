@@ -1,6 +1,6 @@
 package ru.practicum.ewm.user;
 
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -14,10 +14,12 @@ import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.ewm.user.UserMapper.toUserDto;
+
 
 @RestController
 @Slf4j
-@Data
+@RequiredArgsConstructor
 @RequestMapping("/admin/users")
 public class UserController {
 
@@ -37,8 +39,7 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@Valid @RequestBody UserDto userDto) {
-        log.info("Create new user, userDto={}.", userDto);
-        return UserMapper.toUserDto(userService.create(userDto));
+        return toUserDto(userService.create(userDto));
     }
 
     @DeleteMapping("/{id}")

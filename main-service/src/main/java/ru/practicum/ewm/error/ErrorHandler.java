@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.ewm.error.exceptions.AuthException;
+import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.error.exceptions.IncorrectParameterException;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.error.exceptions.UpdateException;
@@ -27,7 +27,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleAuthException(final AuthException e) {
+    public ErrorResponse handleAuthException(final ConflictException e) {
         return new ErrorResponse(e.getMessage());
     }
 

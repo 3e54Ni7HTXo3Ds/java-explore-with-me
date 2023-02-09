@@ -22,17 +22,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        log.info("Добавлен новый пользователь: {} ", user);
+        log.info("User adding: {} ", user);
         return userRepository.save(user);
     }
 
     @Override
     public void delete(Long userId) {
         if (userRepository.existsById(userId)) {
-            log.info("Удаляем пользователя: {} ", userId);
+            log.info("Deleting user: {} ", userId);
             userRepository.deleteById(userId);
         } else {
-            log.info("Нет пользователя: {} ", userId);
+            log.info("No user: {} ", userId);
         }
     }
 
