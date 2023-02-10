@@ -5,4 +5,5 @@ import ru.practicum.ewm.category.model.Cat;
 
 public interface CatRepository extends JpaRepository<Cat, Long> {
     Boolean existsByName(String catName);
+
 }

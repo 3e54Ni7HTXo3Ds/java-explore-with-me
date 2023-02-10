@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.user.dto.UserDto;
 
 import javax.validation.Valid;
@@ -38,7 +39,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@Valid @RequestBody UserDto userDto) {
+    public UserDto create(@Valid @RequestBody UserDto userDto) throws ConflictException {
         return toUserDto(userService.create(userDto));
     }
 

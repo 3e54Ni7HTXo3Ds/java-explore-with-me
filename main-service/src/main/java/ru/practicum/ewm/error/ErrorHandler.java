@@ -26,7 +26,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleAuthException(final ConflictException e) {
         return new ErrorResponse(e.getMessage());
     }

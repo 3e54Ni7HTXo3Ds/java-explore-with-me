@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.model.User;
 
@@ -20,8 +21,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public User create(UserDto userDto) {
+    public User create(UserDto userDto) throws ConflictException {
         User user = UserMapper.toUser(userDto);
+        if (userRepository.existsByName(user.getName())) {
+            throw new ConflictException("Name exists");
+        }
         log.info("User adding: {} ", user);
         return userRepository.save(user);
     }

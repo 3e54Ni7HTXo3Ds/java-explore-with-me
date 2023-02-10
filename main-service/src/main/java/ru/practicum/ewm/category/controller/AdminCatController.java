@@ -22,7 +22,7 @@ public class AdminCatController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CatDto create(@Valid @RequestBody CatDto catDto) {
+    public CatDto create(@Valid @RequestBody CatDto catDto) throws ConflictException {
         return CatMapper.toCatDto(catService.create(catDto));
     }
 

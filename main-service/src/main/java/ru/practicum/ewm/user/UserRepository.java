@@ -11,4 +11,7 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> getUsersByIdIn(List<Long> ids, PageRequest pageRequest);
+
+
+    boolean existsByName(String name);
 }
