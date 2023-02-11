@@ -18,12 +18,6 @@ public class PrivateEventController {
 
     private final EventService eventService;
 
-    @GetMapping
-
-    @GetMapping
-
-    @GetMapping
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponseDto createEvent(@PathVariable Long userId,
@@ -31,7 +25,16 @@ public class PrivateEventController {
         return eventService.createEvent(userId, eventRequestDto);
     }
 
-    @PatchMapping
-
-    @PatchMapping
+//    @GetMapping
+//
+//
+//    @GetMapping
+//
+//    @GetMapping
+//
+//
+//
+//    @PatchMapping
+//
+//    @PatchMapping
 }
