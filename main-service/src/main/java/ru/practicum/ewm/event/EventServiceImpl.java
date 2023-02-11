@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.CatRepository;
 import ru.practicum.ewm.event.dto.EventRequestDto;
 import ru.practicum.ewm.event.dto.EventResponseDto;
+import ru.practicum.ewm.location.LocationRepository;
 import ru.practicum.ewm.user.UserRepository;
 
 @Service
@@ -18,6 +19,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final CatRepository catRepository;
     private final UserRepository userRepository;
+    private final LocationRepository locationRepository;
 
     @Override
     public EventResponseDto createEvent(Long userId, EventRequestDto eventRequestDto) {
