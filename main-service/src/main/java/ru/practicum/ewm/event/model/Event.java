@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.ewm.category.model.Cat;
 import ru.practicum.ewm.user.model.User;
 
 import javax.persistence.*;
@@ -38,8 +39,9 @@ public class Event {
     @Column(name = "event_created")
     private LocalDateTime eventCreated;//
 
-    @Column(name = "event_category")
-    private Long eventCat;//
+    @ManyToOne
+    @JoinColumn(name = "event_category")
+    private Cat eventCat;//
 
     @Column(name = "event_date")
     private LocalDateTime eventData;//
@@ -51,19 +53,18 @@ public class Event {
     private LocalDateTime eventPublishedOn;//
 
     @Column(name = "event_participant_limit")
-    private Long eventTitle;//
+    private Long eventLimit;//
 
     @Column(name = "event_request_moderation")
-    private String eventTitle;//
+    private Boolean eventRequestModeration;//
 
     @Column(name = "event_confirmed_requests")
-    private String eventTitle;//
+    private Long eventConfirmedRequests;//
 
     @Column(name = "event_state")
-    private String eventTitle;//
+    private String eventState;//
 
     @Column(name = "event_views")
-    private String eventTitle;//
-
+    private Long eventViews;//
 
 }
