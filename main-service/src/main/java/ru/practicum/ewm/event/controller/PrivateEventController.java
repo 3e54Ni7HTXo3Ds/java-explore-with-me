@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventRequestDto;
 import ru.practicum.ewm.event.dto.EventResponseDto;
@@ -21,7 +22,7 @@ public class PrivateEventController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponseDto createEvent(@PathVariable Long userId,
-                                        @Valid @RequestBody EventRequestDto eventRequestDto) {
+                                        @Valid @RequestBody EventRequestDto eventRequestDto) throws NotFoundParameterException {
         return eventService.createEvent(userId, eventRequestDto);
     }
 
