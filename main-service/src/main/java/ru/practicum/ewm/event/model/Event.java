@@ -72,4 +72,26 @@ public class Event {
     @JoinColumn(name = "event_location")
     private Location eventLocation;
 
+    public Event(String eventTitle, String eventAnnotation, String eventDescription, User eventInitiator,
+                 LocalDateTime eventCreated,
+                 Cat eventCat, LocalDateTime eventDate, boolean eventPaid, Long eventLimit,
+                 Boolean eventRequestModeration,
+                 String eventState,
+                 Long eventViews, Location eventLocation) {
+
+        this.eventTitle = eventTitle;
+        this.eventAnnotation = eventAnnotation;
+        this.eventDescription = eventDescription;
+        this.eventInitiator = eventInitiator;
+        this.eventCreated = eventCreated;
+        this.eventCat = eventCat;
+        this.eventDate = eventDate;
+        this.eventPaid = eventPaid;
+        this.eventLimit = eventLimit;
+        this.eventRequestModeration = eventRequestModeration;
+        this.eventState = eventState;
+        this.eventViews = eventViews;
+        this.eventLocation = eventLocation;
+
+    }
 }
