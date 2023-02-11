@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @AllArgsConstructor
-public class UserDto {
+public class UserRequestDto {
 
     private Long id; // — уникальный идентификатор пользователя;
     @NotNull

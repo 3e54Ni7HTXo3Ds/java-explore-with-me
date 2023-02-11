@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.ewm.category.model.Cat;
+import ru.practicum.ewm.location.model.Location;
 import ru.practicum.ewm.user.model.User;
 
 import javax.persistence.*;
@@ -44,7 +45,7 @@ public class Event {
     private Cat eventCat;//
 
     @Column(name = "event_date")
-    private LocalDateTime eventData;//
+    private LocalDateTime eventDate;//
 
     @Column(name = "event_paid")
     private Boolean eventPaid;//
@@ -66,5 +67,9 @@ public class Event {
 
     @Column(name = "event_views")
     private Long eventViews;//
+
+    @ManyToOne
+    @JoinColumn(name = "event_location")
+    private Location eventLocation;
 
 }

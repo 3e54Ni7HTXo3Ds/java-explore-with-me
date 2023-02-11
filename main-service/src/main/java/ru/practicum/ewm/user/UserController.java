@@ -7,7 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.error.exceptions.ConflictException;
-import ru.practicum.ewm.user.dto.UserDto;
+import ru.practicum.ewm.user.dto.UserRequestDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -15,7 +15,7 @@ import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm.user.UserMapper.toUserDto;
+import static ru.practicum.ewm.user.UserMapper.toUserRequestDto;
 
 
 @RestController
@@ -27,20 +27,20 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public List<UserDto> get(@RequestParam List<Long> ids,
-                             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
-                             @Positive @RequestParam(required = false, defaultValue = "10") int size) {
+    public List<UserRequestDto> get(@RequestParam List<Long> ids,
+                                    @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
+                                    @Positive @RequestParam(required = false, defaultValue = "10") int size) {
 
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by("id").ascending());
         return userService.findUsersByIds(ids, pageRequest).stream()
-                .map(UserMapper::toUserDto)
+                .map(UserMapper::toUserRequestDto)
                 .collect(Collectors.toList());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@Valid @RequestBody UserDto userDto) throws ConflictException {
-        return toUserDto(userService.create(userDto));
+    public UserRequestDto create(@Valid @RequestBody UserRequestDto userRequestDto) throws ConflictException {
+        return toUserRequestDto(userService.create(userRequestDto));
     }
 
     @DeleteMapping("/{id}")
