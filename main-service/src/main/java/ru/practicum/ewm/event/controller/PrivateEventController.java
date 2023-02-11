@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.error.exceptions.IncorrectParameterException;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
-import ru.practicum.ewm.error.exceptions.UpdateException;
 import ru.practicum.ewm.event.EventMapper;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventRequestDto;
@@ -36,7 +36,7 @@ public class PrivateEventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponseDto createEvent(@Positive @PathVariable Long userId,
                                         @Valid @RequestBody EventRequestDto eventRequestDto)
-            throws NotFoundParameterException, IncorrectParameterException {
+            throws NotFoundParameterException, IncorrectParameterException, ConflictException {
         return toEventResponseDto(eventService.createEvent(userId, eventRequestDto));
     }
 
@@ -61,8 +61,9 @@ public class PrivateEventController {
     public EventResponseDto updateEvent(
             @Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId,
-            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate) throws IncorrectParameterException, UpdateException {
-        return toEventResponseDto(eventService.updateEvent(userId, eventId, eventRequestDtoUpdate));
+            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate)
+            throws IncorrectParameterException, ConflictException {
+        return toEventResponseDto(eventService.updateEvent(userId, eventId, eventRequestDtoUpdate, false));
     }
 
 
