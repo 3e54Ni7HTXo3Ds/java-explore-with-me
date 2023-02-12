@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.compilation.CompilationService;
 
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
