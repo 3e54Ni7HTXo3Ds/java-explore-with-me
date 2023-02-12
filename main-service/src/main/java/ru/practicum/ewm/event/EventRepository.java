@@ -3,17 +3,19 @@ package ru.practicum.ewm.event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.category.model.Cat;
 import ru.practicum.ewm.event.model.Event;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findAllByEventInitiatorId(Long userId, OffsetBasedPageRequest offsetBasedPageRequest);
 
-    Boolean existsByEventCat (Cat cat);
+    Boolean existsByEventCat(Cat cat);
 
     @Query("SELECT E FROM Event E " +
             "WHERE ((:users) IS NULL OR E.eventInitiator.id IN (:users)) " +
