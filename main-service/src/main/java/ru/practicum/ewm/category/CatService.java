@@ -12,7 +12,7 @@ public interface CatService {
 
     Cat update(Long id, CatDto catDto) throws ConflictException;
 
-    void delete(Long id);
+    void delete(Long id) throws ConflictException;
 
     Page<Cat> getCatsPageble(PageRequest pageRequest);
 

@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 public class EventRequestDto {
-
+    @NotNull
     private String annotation;
     @NotNull
     private Long category;

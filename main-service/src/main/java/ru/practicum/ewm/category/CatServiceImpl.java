@@ -10,6 +10,7 @@ import ru.practicum.ewm.category.dto.CatDto;
 import ru.practicum.ewm.category.model.Cat;
 import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
+import ru.practicum.ewm.event.EventRepository;
 
 import static ru.practicum.ewm.category.CatMapper.toCat;
 
@@ -20,6 +21,8 @@ import static ru.practicum.ewm.category.CatMapper.toCat;
 public class CatServiceImpl implements CatService {
 
     private final CatRepository catRepository;
+
+    private final EventRepository eventRepository;
 
     @Override
     public Cat create(CatDto catDto) throws ConflictException {
@@ -45,7 +48,11 @@ public class CatServiceImpl implements CatService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws ConflictException {
+
+        Cat cat = catRepository.findById(id).orElseThrow(new ConflictException("Wrong cat"));
+        if (eventRepository.existsByEventCat(cat)) throw new ConflictException("Cat is not empty");
+
         catRepository.deleteById(id);
     }
 
