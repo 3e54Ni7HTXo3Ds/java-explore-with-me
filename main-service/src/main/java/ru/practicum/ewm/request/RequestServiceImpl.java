@@ -56,12 +56,16 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<Request> getRequests(Long userId) {
-        return null;
+    public List<Request> getRequests(Long userId) throws ConflictException {
+        userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
+        return requestRepository.findAllByRequesterId(userId);
     }
 
     @Override
-    public Request cancelRequest(Long userId, Long requestId) {
-        return null;
+    public Request cancelRequest(Long userId, Long requestId) throws ConflictException {
+        userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
+        Request request = requestRepository.findById(requestId).orElseThrow(new ConflictException("Wrong request"));
+        request.setStatus(String.valueOf(RequestState.CANCELED));
+        return requestRepository.save(request);
     }
 }

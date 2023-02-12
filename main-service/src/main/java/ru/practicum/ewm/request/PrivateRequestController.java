@@ -17,7 +17,7 @@ import static ru.practicum.ewm.request.RequestMapper.toRequestDto;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}/requests")
-public class RequestController {
+public class PrivateRequestController {
 
     private final RequestService requestService;
 
@@ -29,7 +29,7 @@ public class RequestController {
     }
 
     @GetMapping
-    public List<RequestDto> getRequests(@PathVariable Long userId) {
+    public List<RequestDto> getRequests(@PathVariable Long userId) throws ConflictException {
         return requestService.getRequests(userId).stream()
                 .map(RequestMapper::toRequestDto)
                 .collect(Collectors.toList());
@@ -37,7 +37,7 @@ public class RequestController {
 
     @PatchMapping("/{requestId}/cancel")
     public RequestDto cancelRequest(@PathVariable Long userId,
-                                    @PathVariable Long requestId) {
+                                    @PathVariable Long requestId) throws ConflictException {
         return toRequestDto(requestService.cancelRequest(userId, requestId));
     }
 }

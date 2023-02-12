@@ -9,7 +9,7 @@ import java.util.List;
 public interface RequestService {
     Request createRequest(Long userId, Long eventId) throws NotFoundParameterException, ConflictException;
 
-    List<Request> getRequests(Long userId);
+    List<Request> getRequests(Long userId) throws ConflictException;
 
-    Request cancelRequest(Long userId, Long requestId);
+    Request cancelRequest(Long userId, Long requestId) throws ConflictException;
 }
