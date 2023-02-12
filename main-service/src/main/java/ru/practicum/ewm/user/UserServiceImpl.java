@@ -2,7 +2,6 @@ package ru.practicum.ewm.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findUsersByIds(List<Long> ids, PageRequest pageRequest) {
+    public List<User> findUsersByIds(List<Long> ids, PageRequest pageRequest) {
         return userRepository.getUsersByIdIn(ids, pageRequest);
     }
 

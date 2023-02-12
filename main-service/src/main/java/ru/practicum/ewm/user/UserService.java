@@ -1,6 +1,5 @@
 package ru.practicum.ewm.user;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.user.dto.UserRequestDto;
@@ -13,5 +12,5 @@ public interface UserService {
 
     void delete(Long userId);
 
-    Page<User> findUsersByIds(List<Long> ids, PageRequest pageRequest);
+    List<User> findUsersByIds(List<Long> ids, PageRequest pageRequest);
 }

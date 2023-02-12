@@ -160,5 +160,49 @@ public class EventServiceImpl implements EventService {
 
         return eventRepository.save(event);
     }
+
+    @Override
+    public List<Event> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories, String rangeStart,
+                                      String rangeEnd, int from, int size) {
+        OffsetBasedPageRequest offsetBasedPageRequest =
+                new OffsetBasedPageRequest(from, size, Sort.by("id"));
+
+        LocalDateTime startTime = null;
+        LocalDateTime endTime = null;
+
+        if (rangeStart != null) startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
+        if (rangeEnd != null) endTime = LocalDateTime.parse(rangeEnd, dateTimeFormatter);
+
+        return eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest);
+
+    }
+
+    @Override
+    public List<Event> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
+                                       String rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
+
+        if ("VIEWS".equals(sort)) {
+            sort = "eventViews";
+        } else {
+            sort = "eventDate";
+        }
+
+        OffsetBasedPageRequest offsetBasedPageRequest =
+                new OffsetBasedPageRequest(from, size, Sort.by(sort).ascending());
+
+        LocalDateTime startTime;
+        LocalDateTime endTime;
+
+        if (rangeStart != null) startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
+        else startTime = LocalDateTime.now();
+        if (rangeEnd != null) endTime = LocalDateTime.parse(rangeEnd, dateTimeFormatter);
+        else endTime = LocalDateTime.now().plusYears(100);
+        if (text != null) text = text.toLowerCase();
+
+        List<Event> list = eventRepository.findEventsPublic(text, categories, paid, startTime, endTime,
+                onlyAvailable, offsetBasedPageRequest);
+
+        return list;
+    }
 }
 

@@ -19,6 +19,12 @@ public interface EventService {
 
     Event updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate, Boolean admin)
             throws IncorrectParameterException, ConflictException;
+
+    List<Event> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories, String rangeStart,
+                               String rangeEnd, int from, int size);
+
+    List<Event> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
+                                Boolean onlyAvailable, String sort, int from, int size);
 }
 
 
