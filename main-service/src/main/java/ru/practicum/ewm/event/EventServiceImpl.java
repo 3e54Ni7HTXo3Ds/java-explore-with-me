@@ -17,15 +17,24 @@ import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.location.LocationRepository;
 import ru.practicum.ewm.location.dto.LocationRequestDto;
 import ru.practicum.ewm.location.model.Location;
+import ru.practicum.ewm.request.RequestRepository;
+import ru.practicum.ewm.request.dto.RequestDto;
+import ru.practicum.ewm.request.dto.RequestDtoShort;
+import ru.practicum.ewm.request.dto.RequestResponseDtoShort;
+import ru.practicum.ewm.request.model.Request;
+import ru.practicum.ewm.request.model.RequestState;
 import ru.practicum.ewm.user.UserRepository;
 import ru.practicum.ewm.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static ru.practicum.ewm.location.LocationMapper.toLocation;
+import static ru.practicum.ewm.request.RequestMapper.toRequestDto;
 
 @Service
 @Slf4j
@@ -37,6 +46,7 @@ public class EventServiceImpl implements EventService {
     private final CatRepository catRepository;
     private final UserRepository userRepository;
     private final LocationRepository locationRepository;
+    private final RequestRepository requestRepository;
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
@@ -203,6 +213,69 @@ public class EventServiceImpl implements EventService {
                 onlyAvailable, offsetBasedPageRequest);
 
         return list;
+    }
+
+    @Override
+    public List<Request> getEventRequests(Long userId, Long eventId) throws ConflictException {
+        userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
+        eventRepository.findById(eventId).orElseThrow(new ConflictException("Wrong event"));
+        return requestRepository.findAllByInitiatorId(userId);
+    }
+
+    @Override
+    public RequestResponseDtoShort updateEventRequests(Long userId, Long eventId, RequestDtoShort requestDtoShort)
+            throws ConflictException {
+        userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
+        Event event = eventRepository.findById(eventId).orElseThrow(new ConflictException("Wrong event"));
+        Long eventLimit = event.getEventLimit();
+        Long confirmed = event.getEventConfirmedRequests();
+
+        if (Objects.equals(eventLimit, confirmed)) throw new ConflictException("No place");
+
+        List<RequestDto> confirmedRequests = new ArrayList<>();
+        List<RequestDto> rejectedRequests = new ArrayList<>();
+        RequestResponseDtoShort requestResponseDtoShort =
+                new RequestResponseDtoShort(confirmedRequests, rejectedRequests);
+        List<Long> ids = requestDtoShort.getRequestIds();
+        String status = requestDtoShort.getStatus();
+
+        List<Request> allInitiatorPendingRequests =
+                requestRepository.findAllByIdInAndStatus(ids, RequestState.PENDING.toString());
+
+        if (ids.size() != allInitiatorPendingRequests.size()) throw new ConflictException("Only PENDING");
+
+        if (allInitiatorPendingRequests.isEmpty() || (!event.getEventRequestModeration() || eventLimit == 0)) {
+            return requestResponseDtoShort;
+        }
+
+        if (status.equals(RequestState.CONFIRMED.toString())) {
+            for (Request request : allInitiatorPendingRequests) {
+                request.setStatus(RequestState.CONFIRMED.toString());
+                confirmedRequests.add(toRequestDto(request));
+                confirmed++;
+                if (eventLimit.equals(confirmed)) {
+                    for (int i = allInitiatorPendingRequests.indexOf(request);
+                         i < allInitiatorPendingRequests.size() - 1; i++) {
+                        request.setStatus(RequestState.REJECTED.toString());
+                        rejectedRequests.add(toRequestDto(request));
+                    }
+                    break;
+                }
+            }
+            requestRepository.saveAll(allInitiatorPendingRequests);
+        }
+
+        if (status.equals(RequestState.REJECTED.toString())) {
+            for (Request request : allInitiatorPendingRequests) {
+                request.setStatus(RequestState.REJECTED.toString());
+                rejectedRequests.add(toRequestDto(request));
+            }
+            requestRepository.saveAll(allInitiatorPendingRequests);
+        }
+        event.setEventConfirmedRequests(confirmed);
+        eventRepository.save(event);
+
+        return requestResponseDtoShort;
     }
 }
 

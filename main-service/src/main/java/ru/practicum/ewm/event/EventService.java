@@ -6,6 +6,9 @@ import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.event.dto.EventRequestDto;
 import ru.practicum.ewm.event.dto.EventRequestDtoUpdate;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.request.dto.RequestDtoShort;
+import ru.practicum.ewm.request.dto.RequestResponseDtoShort;
+import ru.practicum.ewm.request.model.Request;
 
 import java.util.List;
 
@@ -25,6 +28,11 @@ public interface EventService {
 
     List<Event> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
                                 Boolean onlyAvailable, String sort, int from, int size);
+
+    List<Request> getEventRequests(Long userId, Long eventId) throws ConflictException;
+
+    RequestResponseDtoShort updateEventRequests(Long userId, Long eventId, RequestDtoShort requestDtoShort)
+            throws ConflictException;
 }
 
 

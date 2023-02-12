@@ -14,6 +14,10 @@ import ru.practicum.ewm.event.dto.EventRequestDto;
 import ru.practicum.ewm.event.dto.EventRequestDtoUpdate;
 import ru.practicum.ewm.event.dto.EventResponseDto;
 import ru.practicum.ewm.event.dto.EventResponseDtoShort;
+import ru.practicum.ewm.request.RequestMapper;
+import ru.practicum.ewm.request.dto.RequestDto;
+import ru.practicum.ewm.request.dto.RequestDtoShort;
+import ru.practicum.ewm.request.dto.RequestResponseDtoShort;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -66,13 +70,21 @@ public class PrivateEventController {
         return toEventResponseDto(eventService.updateEvent(userId, eventId, eventRequestDtoUpdate, false));
     }
 
+    @GetMapping(path = "/{eventId}/requests")
+    public List<RequestDto> getEventRequests(
+            @Positive @PathVariable Long userId,
+            @Positive @PathVariable Long eventId) throws ConflictException {
+        return eventService.getEventRequests(userId, eventId).stream()
+                .map(RequestMapper::toRequestDto)
+                .collect(Collectors.toList());
+    }
 
-//
-//    @GetMapping
-//
-//
-//
-//    @PatchMapping
-//
-//
+    @PatchMapping(path = "/{eventId}/requests")
+    public RequestResponseDtoShort updateEventRequests(
+            @Positive @PathVariable Long userId,
+            @Positive @PathVariable Long eventId,
+            @RequestBody RequestDtoShort requestDtoShort)
+            throws ConflictException {
+        return eventService.updateEventRequests(userId, eventId, requestDtoShort);
+    }
 }

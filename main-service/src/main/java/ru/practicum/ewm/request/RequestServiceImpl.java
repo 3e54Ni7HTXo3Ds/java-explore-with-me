@@ -33,7 +33,7 @@ public class RequestServiceImpl implements RequestService {
 
         if (requester.equals(event.getEventInitiator())) throw new ConflictException("Wrong user");
 
-        if (requestRepository.getAllByEventId(eventId).size() >= event.getEventLimit())
+        if (requestRepository.getAllByEventIdAndStatus(eventId,RequestState.CONFIRMED.toString()).size() >= event.getEventLimit())
             throw new ConflictException("Event is full");
 
         if (requestRepository.existsByRequesterIdAndEventId(userId, event.getId()))

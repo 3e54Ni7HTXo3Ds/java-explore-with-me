@@ -77,7 +77,7 @@ public class Event {
                  Cat eventCat, LocalDateTime eventDate, boolean eventPaid, Long eventLimit,
                  Boolean eventRequestModeration,
                  String eventState,
-                 Long eventViews, Location eventLocation) {
+                 Long eventViews, Location eventLocation,Long eventConfirmedRequests) {
 
         this.eventTitle = eventTitle;
         this.eventAnnotation = eventAnnotation;
@@ -92,6 +92,7 @@ public class Event {
         this.eventState = eventState;
         this.eventViews = eventViews;
         this.eventLocation = eventLocation;
+        this.eventConfirmedRequests =eventConfirmedRequests;
 
     }
 }

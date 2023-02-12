@@ -38,7 +38,8 @@ public class EventMapper {
                 eventRequestDto.getRequestModeration(),
                 EventState.PENDING.toString(),
                 0L,
-                eventLocation
+                eventLocation,
+                0L
         );
     }
 
