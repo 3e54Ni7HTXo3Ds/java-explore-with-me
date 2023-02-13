@@ -26,12 +26,11 @@ public class StatsClient extends BaseClient {
     }
 
     public void createHit(HttpServletRequest httpServletRequest) {
-        post("/hit",
-                new HitRequestDto(
-                        "ewm-main-service",
-                        httpServletRequest.getRequestURI(),
-                        httpServletRequest.getRemoteAddr(),
-                        LocalDateTime.now()));
+        post(new HitRequestDto(
+                "ewm-main-service",
+                httpServletRequest.getRequestURI(),
+                httpServletRequest.getRemoteAddr(),
+                LocalDateTime.now()));
     }
 
     public ResponseEntity<Object> getHits(String start, String end, String uris, Boolean unique) {

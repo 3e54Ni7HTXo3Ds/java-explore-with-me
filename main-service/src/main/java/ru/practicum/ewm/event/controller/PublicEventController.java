@@ -7,7 +7,9 @@ import ru.practicum.ewm.error.exceptions.IncorrectParameterException;
 import ru.practicum.ewm.event.EventMapper;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventResponseDto;
+import ru.practicum.ewm.stats.client.StatsClient;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,10 +24,16 @@ public class PublicEventController {
 
     private final EventService eventService;
 
-    @GetMapping(path = "/{eventId}")
-    public EventResponseDto getEvent(
+    private final StatsClient statsClient;
 
-            @Positive @PathVariable Long eventId) throws IncorrectParameterException {
+    @GetMapping(path = "/{eventId}")
+    public EventResponseDto getEventPublic(
+            @Positive @PathVariable Long eventId,
+            HttpServletRequest request) throws IncorrectParameterException {
+
+        statsClient.createHit(request);
+
+
         return toEventResponseDto(eventService.getEvent(null, eventId));
     }
 
