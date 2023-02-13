@@ -7,16 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.compilation.CompilationService;
 import ru.practicum.ewm.compilation.Dto.CompilationRequestDto;
 import ru.practicum.ewm.compilation.Dto.CompilationResponseDto;
-import ru.practicum.ewm.error.exceptions.ConflictException;
-import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
-import ru.practicum.ewm.request.RequestMapper;
-import ru.practicum.ewm.request.dto.RequestDto;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import javax.validation.constraints.Positive;
 
 import static ru.practicum.ewm.compilation.CompilationMapper.toCompilationResponseDto;
-import static ru.practicum.ewm.request.RequestMapper.toRequestDto;
 
 
 @RestController
@@ -29,23 +23,20 @@ public class AdminCompilationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationResponseDto createCompilation(@RequestBody CompilationRequestDto compilationRequestDto
-                                       ) throws NotFoundParameterException, ConflictException {
+    public CompilationResponseDto createCompilation(@RequestBody CompilationRequestDto compilationRequestDto) {
         return toCompilationResponseDto(compilationService.createCompilation(compilationRequestDto));
     }
 
-
-    @GetMapping
-    public List<RequestDto> getRequests(@PathVariable Long userId) throws ConflictException {
-        return requestService.getRequests(userId).stream()
-                .map(RequestMapper::toRequestDto)
-                .collect(Collectors.toList());
+    @PatchMapping("/{id}")
+    public CompilationResponseDto updateCompilation(@PathVariable Long id,
+                                                    @RequestBody CompilationRequestDto compilationRequestDto) {
+        return toCompilationResponseDto(compilationService.updateCompilation(id, compilationRequestDto));
     }
 
-    @PatchMapping("/{requestId}/cancel")
-    public RequestDto cancelRequest(@PathVariable Long userId,
-                                    @PathVariable Long requestId) throws ConflictException {
-        return toRequestDto(requestService.cancelRequest(userId, requestId));
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompilation(@Positive @PathVariable("id") Long id) {
+        compilationService.deleteCompilation(id);
     }
 
 }

@@ -29,7 +29,10 @@ public class Compilation {
     private String title;//
 
     @ManyToMany
-    @JoinTable(name = "compilations_events")
+    @JoinTable(
+            name = "compilations_events",
+            joinColumns = @JoinColumn(name = "compilations_events_compilation_id"),
+            inverseJoinColumns = @JoinColumn(name = "compilations_events_event_id"))
     private List<Event> eventList;
 
 }

@@ -2,7 +2,7 @@ package ru.practicum.ewm.compilation.Dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.dto.EventResponseDtoShort;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CompilationResponseDto {
 
-    private List<Event> events;
+    private List<EventResponseDtoShort> events;
     private Long id;
     private Boolean pinned;
     @NotNull
