@@ -25,16 +25,17 @@ public class PublicCompilationController {
 
     @GetMapping
     public List<CompilationResponseDto> getCompilations(
-            @RequestParam Boolean pinned,
+            @RequestParam(required = false, defaultValue = "false") Boolean pinned,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
             @Positive @RequestParam(required = false, defaultValue = "10") int size) {
-        return compilationService.getCompilations(pinned,from,size).stream()
+        return compilationService.getCompilations(pinned, from, size).stream()
                 .map(CompilationMapper::toCompilationResponseDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping(path = "/{id}")
-    public CompilationResponseDto getCompilation(@PathVariable Long id) throws NotFoundParameterException {
+    public CompilationResponseDto getCompilation(@PathVariable Long id)
+            throws NotFoundParameterException {
         return toCompilationResponseDto(compilationService.getCompilation(id));
     }
 

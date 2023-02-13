@@ -3,11 +3,14 @@ package ru.practicum.ewm.compilation.Controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.compilation.CompilationService;
 import ru.practicum.ewm.compilation.Dto.CompilationRequestDto;
 import ru.practicum.ewm.compilation.Dto.CompilationResponseDto;
+import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
 import static ru.practicum.ewm.compilation.CompilationMapper.toCompilationResponseDto;
@@ -16,6 +19,7 @@ import static ru.practicum.ewm.compilation.CompilationMapper.toCompilationRespon
 @RestController
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/admin/compilations")
 public class AdminCompilationController {
 
@@ -23,13 +27,14 @@ public class AdminCompilationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationResponseDto createCompilation(@RequestBody CompilationRequestDto compilationRequestDto) {
+    public CompilationResponseDto createCompilation(@Valid @RequestBody CompilationRequestDto compilationRequestDto) {
         return toCompilationResponseDto(compilationService.createCompilation(compilationRequestDto));
     }
 
     @PatchMapping("/{id}")
     public CompilationResponseDto updateCompilation(@PathVariable Long id,
-                                                    @RequestBody CompilationRequestDto compilationRequestDto) {
+                                                    @RequestBody CompilationRequestDto compilationRequestDto)
+            throws NotFoundParameterException {
         return toCompilationResponseDto(compilationService.updateCompilation(id, compilationRequestDto));
     }
 
