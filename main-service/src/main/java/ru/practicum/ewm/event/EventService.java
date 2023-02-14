@@ -9,7 +9,9 @@ import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.request.dto.RequestDtoShort;
 import ru.practicum.ewm.request.dto.RequestResponseDtoShort;
 import ru.practicum.ewm.request.model.Request;
+import ru.practicum.ewm.stats.dto.HitResponseDto;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface EventService {
@@ -18,7 +20,8 @@ public interface EventService {
 
     List<Event> getEvents(Long userId, int from, int size);
 
-    Event getEvent(Long userId, Long eventId) throws IncorrectParameterException;
+    Event getEvent(Long userId, Long eventId, List<HitResponseDto> hitResponseDtos, String uri)
+            throws NotFoundParameterException;
 
     Event updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate, Boolean admin)
             throws IncorrectParameterException, ConflictException;
@@ -27,7 +30,9 @@ public interface EventService {
                                String rangeEnd, int from, int size);
 
     List<Event> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
-                                Boolean onlyAvailable, String sort, int from, int size);
+                                Boolean onlyAvailable, String sort, int from, int size,
+                                List<HitResponseDto> hitResponseDtos,
+                                HttpServletRequest httpServletRequest);
 
     List<Request> getEventRequests(Long userId, Long eventId) throws ConflictException;
 

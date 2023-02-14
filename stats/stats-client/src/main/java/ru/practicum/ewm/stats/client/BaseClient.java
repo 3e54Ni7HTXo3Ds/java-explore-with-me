@@ -1,5 +1,6 @@
 package ru.practicum.ewm.stats.client;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -7,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.ewm.stats.dto.HitResponseDto;
 
+import java.util.List;
 import java.util.Map;
 
 public class BaseClient {
@@ -17,30 +20,27 @@ public class BaseClient {
         this.rest = rest;
     }
 
-    protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
-        return makeAndSendGetRequest(path, parameters, null);
+    protected ResponseEntity<List<HitResponseDto>> get(String path, Map<String, Object> parameters) {
+        return makeAndSendGetRequest(path, parameters);
     }
 
-    private <T> ResponseEntity<Object> makeAndSendGetRequest(
-            String path,
-            @Nullable Map<String, Object> parameters,
-            @Nullable T body) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(body, new HttpHeaders());
-
-        ResponseEntity<Object> response;
+    private <T> ResponseEntity<List<HitResponseDto>> makeAndSendGetRequest(String path,
+                                                                           Map<String, Object> parameters) {
+        HttpEntity<T> requestEntity = new HttpEntity<>(new HttpHeaders());
+        ParameterizedTypeReference<List<HitResponseDto>> typeRef = new ParameterizedTypeReference<>() {
+        };
+        ResponseEntity<List<HitResponseDto>> response;
         try {
-            if (parameters != null) {
-                response = rest.exchange(path, HttpMethod.GET, requestEntity, Object.class, parameters);
-            } else {
-                response = rest.exchange(path, HttpMethod.GET, requestEntity, Object.class);
-            }
+            response = rest.exchange(path, HttpMethod.GET, requestEntity, typeRef, parameters);
+
         } catch (HttpStatusCodeException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
+            throw new RuntimeException("Network error");
         }
         return prepareGetResponse(response);
     }
 
-    private static ResponseEntity<Object> prepareGetResponse(ResponseEntity<Object> response) {
+    private static ResponseEntity<List<HitResponseDto>> prepareGetResponse(
+            ResponseEntity<List<HitResponseDto>> response) {
         if (response.getStatusCode().is2xxSuccessful()) {
             return response;
         }

@@ -23,9 +23,11 @@ import ru.practicum.ewm.request.dto.RequestDtoShort;
 import ru.practicum.ewm.request.dto.RequestResponseDtoShort;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.model.RequestState;
+import ru.practicum.ewm.stats.dto.HitResponseDto;
 import ru.practicum.ewm.user.UserRepository;
 import ru.practicum.ewm.user.model.User;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -78,8 +80,19 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event getEvent(Long userId, Long eventId) throws IncorrectParameterException {
-        return eventRepository.findById(eventId).orElseThrow(new IncorrectParameterException("Wrong event"));
+    public Event getEvent(Long userId, Long eventId, List<HitResponseDto> hitResponseDtos, String uri)
+            throws NotFoundParameterException {
+
+        Event event = eventRepository.findById(eventId).orElseThrow(new NotFoundParameterException("Wrong event"));
+
+        event.setEventConfirmedRequests(
+                requestRepository.countAllByEventIdAndStatus(eventId, RequestState.CONFIRMED.toString()));
+        if (hitResponseDtos != null && !hitResponseDtos.isEmpty())
+            for (HitResponseDto dto : hitResponseDtos) {
+                if (dto.getUri().equals(uri))
+                    event.setEventViews(dto.getHits());
+            }
+        return eventRepository.save(event);
     }
 
     @Override
@@ -189,7 +202,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<Event> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                       String rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
+                                       String rangeEnd, Boolean onlyAvailable, String sort, int from, int size,
+                                       List<HitResponseDto> hitResponseDtos,
+                                       HttpServletRequest httpServletRequest) {
 
         if ("VIEWS".equals(sort)) {
             sort = "eventViews";
@@ -211,6 +226,10 @@ public class EventServiceImpl implements EventService {
 
         List<Event> list = eventRepository.findEventsPublic(text, categories, paid, startTime, endTime,
                 onlyAvailable, offsetBasedPageRequest);
+
+        if (onlyAvailable) {
+            list.removeIf(event -> event.getEventConfirmedRequests() >= event.getEventLimit());
+        }
 
         return list;
     }

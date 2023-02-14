@@ -3,11 +3,12 @@ package ru.practicum.ewm.event.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.error.exceptions.IncorrectParameterException;
+import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.event.EventMapper;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventResponseDto;
 import ru.practicum.ewm.stats.client.StatsClient;
+import ru.practicum.ewm.stats.dto.HitResponseDto;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
@@ -29,12 +30,12 @@ public class PublicEventController {
     @GetMapping(path = "/{eventId}")
     public EventResponseDto getEventPublic(
             @Positive @PathVariable Long eventId,
-            HttpServletRequest request) throws IncorrectParameterException {
+            HttpServletRequest request) throws NotFoundParameterException {
 
         statsClient.createHit(request);
+        List<HitResponseDto> hits = statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
 
-
-        return toEventResponseDto(eventService.getEvent(null, eventId));
+        return toEventResponseDto(eventService.getEvent(null, eventId, hits, request.getRequestURI()));
     }
 
     @GetMapping
@@ -47,9 +48,14 @@ public class PublicEventController {
             @RequestParam(required = false, defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(required = false, defaultValue = "EVENT_DATE") String sort,
             @RequestParam(required = false, defaultValue = "0") int from,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+            @RequestParam(required = false, defaultValue = "10") int size,
+            HttpServletRequest request) {
+
+        statsClient.createHit(request);
+        List<HitResponseDto> hits = statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
+
         return eventService.getEventsPublic(
-                        text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size).stream()
+                        text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, hits, request).stream()
                 .map(EventMapper::toEventResponseDto)
                 .collect(Collectors.toList());
     }

@@ -57,8 +57,8 @@ public class PrivateEventController {
     @GetMapping(path = "/{eventId}")
     public EventResponseDto getEvent(
             @Positive @PathVariable Long userId,
-            @Positive @PathVariable Long eventId) throws IncorrectParameterException {
-        return toEventResponseDto(eventService.getEvent(userId, eventId));
+            @Positive @PathVariable Long eventId) throws NotFoundParameterException {
+        return toEventResponseDto(eventService.getEvent(userId, eventId,null, null));
     }
 
     @PatchMapping(path = "/{eventId}")
