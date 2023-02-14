@@ -38,8 +38,8 @@ public class StatsClient extends BaseClient {
 
     public ResponseEntity<List<HitResponseDto>> getHits(String start, String end, String uris, Boolean unique) {
         if (start == null) {
-            start = LocalDateTime.of(1970, 1, 1, 1, 1).
-                    format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            start = LocalDateTime.of(1970, 1, 1, 1, 1)
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         if (end == null) {
             end = LocalDateTime.now().plusYears(100).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
