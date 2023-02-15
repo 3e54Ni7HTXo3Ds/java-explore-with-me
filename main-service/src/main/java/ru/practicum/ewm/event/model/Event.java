@@ -59,13 +59,13 @@ public class Event {
     @Column(name = "event_request_moderation")
     private Boolean eventRequestModeration;//
 
-    @Column(name = "event_confirmed_requests")
+    @Transient
     private Long eventConfirmedRequests;//
 
     @Column(name = "event_state")
     private String eventState;//
 
-    @Column(name = "event_views")
+    @Transient
     private Long eventViews;//
 
     @ManyToOne

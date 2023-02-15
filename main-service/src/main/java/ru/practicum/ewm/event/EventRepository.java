@@ -31,9 +31,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND ((:categories) is null OR e.eventCat.id IN (:categories)) " +
             "AND (:paid is null OR e.eventPaid = :paid) " +
             "AND (e.eventDate BETWEEN :startTime AND :endTime) " +
-            "AND (:onlyAvailable is null OR e.eventState='PUBLISHED')")
+            "AND (e.eventState='PUBLISHED')")
     List<Event> findEventsPublic(@Param("text") String text, @Param("categories") List<Long> categories,
                                  @Param("paid") Boolean paid, @Param("startTime") LocalDateTime startTime,
-                                 @Param("endTime") LocalDateTime endTime, @Param("onlyAvailable") Boolean onlyAvailable,
+                                 @Param("endTime") LocalDateTime endTime,
                                  OffsetBasedPageRequest offsetBasedPageRequest);
 }

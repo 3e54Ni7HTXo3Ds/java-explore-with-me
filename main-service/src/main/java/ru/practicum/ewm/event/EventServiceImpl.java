@@ -251,6 +251,7 @@ public class EventServiceImpl implements EventService {
 
         LocalDateTime startTime;
         LocalDateTime endTime;
+        Long eventConfirmedRequests;
 
         if (rangeStart != null) {
             startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
@@ -267,10 +268,25 @@ public class EventServiceImpl implements EventService {
         }
 
         List<Event> list = eventRepository.findEventsPublic(text, categories, paid, startTime, endTime,
-                onlyAvailable, offsetBasedPageRequest);
+                offsetBasedPageRequest);
+
+        List<Request> confirmedList =
+                requestRepository.getAllByEventInAndStatus(list, RequestState.CONFIRMED.toString());
+
+        for (Event event : list) {
+            eventConfirmedRequests = 0L;
+            for (Request request : confirmedList) {
+                if (request.getEvent().equals(event)) {
+                    eventConfirmedRequests++;
+                    confirmedList.remove(request);
+                }
+            }
+            event.setEventConfirmedRequests(eventConfirmedRequests);
+        }
 
         if (onlyAvailable) {
-            list.removeIf(event -> event.getEventConfirmedRequests() >= event.getEventLimit());
+            list.removeIf(event -> (event.getEventConfirmedRequests() >= event.getEventLimit() &&
+                    event.getEventLimit() != 0));
         }
 
         return list.stream()
@@ -293,45 +309,51 @@ public class EventServiceImpl implements EventService {
         userRepository.findById(userId).orElseThrow(() -> new ConflictException("Wrong user"));
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ConflictException("Wrong event"));
         Long eventLimit = event.getEventLimit();
-        Long confirmed = event.getEventConfirmedRequests();
-
-        if (Objects.equals(eventLimit, confirmed)) {
-            throw new ConflictException("No place");
-        }
+        Long confirmed = 0L;
+        String status = requestDtoShort.getStatus();
 
         List<RequestDto> confirmedRequests = new ArrayList<>();
         List<RequestDto> rejectedRequests = new ArrayList<>();
+        List<Request> allInitiatorPendingRequests = new ArrayList<>();
+
         RequestResponseDtoShort requestResponseDtoShort =
                 new RequestResponseDtoShort(confirmedRequests, rejectedRequests);
-        List<Long> ids = requestDtoShort.getRequestIds();
-        String status = requestDtoShort.getStatus();
 
-        List<Request> allInitiatorPendingRequests =
-                requestRepository.findAllByIdInAndStatus(ids, RequestState.PENDING.toString());
+        List<Request> requests = requestRepository.getAllByEventIdAndStatusIn(eventId,
+                List.of(RequestState.CONFIRMED.toString(), RequestState.PENDING.toString())); // Ходим 1 раз в базу
 
-        if (ids.size() != allInitiatorPendingRequests.size()) {
-            throw new ConflictException("Only PENDING");
+        for (Request request : requests) {            // раскладываем подтвержденные и те, которые можно менять
+            if (request.getStatus().equals(RequestState.CONFIRMED.toString())) {
+                confirmed++;
+            } else {
+                allInitiatorPendingRequests.add(request);
+            }
+        }
+
+        if (Objects.equals(eventLimit, confirmed) && eventLimit != 0) {
+            throw new ConflictException("No place");
         }
 
         if (allInitiatorPendingRequests.isEmpty() || (!event.getEventRequestModeration() || eventLimit == 0)) {
             return requestResponseDtoShort;
         }
 
-        if (status.equals(RequestState.CONFIRMED.toString())) {
-            for (Request request : allInitiatorPendingRequests) {
-                request.setStatus(RequestState.CONFIRMED.toString());
-                confirmedRequests.add(toRequestDto(request));
-                confirmed++;
-                if (eventLimit.equals(confirmed)) {
-                    for (int i = allInitiatorPendingRequests.indexOf(request);
-                         i < allInitiatorPendingRequests.size() - 1; i++) {
-                        request.setStatus(RequestState.REJECTED.toString());
+        if (status.equals(RequestState.CONFIRMED.toString()) && eventLimit > 0) {
+            for (Request request : allInitiatorPendingRequests) {                         // все, что можно подтвердить
+                if (eventLimit.equals(confirmed)) {                                     //но сначала проверяем на лимит
+                    for (int i = allInitiatorPendingRequests.indexOf(request);     //если лимит исчерпан - оставшиеся
+                         i <= allInitiatorPendingRequests.size() - 1; i++) {
+                        allInitiatorPendingRequests.get(i).setStatus(RequestState.REJECTED.toString()); // в отказ
                         rejectedRequests.add(toRequestDto(request));
                     }
                     break;
                 }
+                request.setStatus(RequestState.CONFIRMED.toString());                   //подтверждаем
+                confirmedRequests.add(toRequestDto(request));
+                confirmed++;
+
             }
-            requestRepository.saveAll(allInitiatorPendingRequests);
+            requestRepository.saveAll(allInitiatorPendingRequests);             //сохраняем пачкой все заявки
         }
 
         if (status.equals(RequestState.REJECTED.toString())) {
@@ -341,9 +363,6 @@ public class EventServiceImpl implements EventService {
             }
             requestRepository.saveAll(allInitiatorPendingRequests);
         }
-        event.setEventConfirmedRequests(confirmed);
-        eventRepository.save(event);
-
         return requestResponseDtoShort;
     }
 }

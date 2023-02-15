@@ -37,7 +37,8 @@ public class RequestServiceImpl implements RequestService {
 
         if (requester.equals(event.getEventInitiator())) throw new ConflictException("Wrong user");
 
-        if (requestRepository.getAllByEventIdAndStatus(eventId,RequestState.CONFIRMED.toString()).size() >= event.getEventLimit())
+        if (requestRepository.getAllByEventIdAndStatusIn(eventId, List.of(RequestState.CONFIRMED.toString())).size() >=
+                event.getEventLimit())
             throw new ConflictException("Event is full");
 
         if (requestRepository.existsByRequesterIdAndEventId(userId, event.getId()))
@@ -70,7 +71,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public RequestDto cancelRequest(Long userId, Long requestId) throws ConflictException {
         userRepository.findById(userId).orElseThrow(() -> new ConflictException("Wrong user"));
-        Request request = requestRepository.findById(requestId).orElseThrow(() -> new ConflictException("Wrong request"));
+        Request request =
+                requestRepository.findById(requestId).orElseThrow(() -> new ConflictException("Wrong request"));
         request.setStatus(String.valueOf(RequestState.CANCELED));
         return toRequestDto(requestRepository.save(request));
     }
