@@ -13,9 +13,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static ru.practicum.ewm.user.UserMapper.toUserRequestDto;
 
 
 @RestController
@@ -32,15 +29,13 @@ public class UserController {
                                     @Positive @RequestParam(required = false, defaultValue = "10") int size) {
 
         PageRequest pageRequest = PageRequest.of(from / size, size, Sort.by("id").ascending());
-        return userService.findUsersByIds(ids, pageRequest).stream()
-                .map(UserMapper::toUserRequestDto)
-                .collect(Collectors.toList());
+        return userService.findUsersByIds(ids, pageRequest);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserRequestDto create(@Valid @RequestBody UserRequestDto userRequestDto) throws ConflictException {
-        return toUserRequestDto(userService.create(userRequestDto));
+        return userService.create(userRequestDto);
     }
 
     @DeleteMapping("/{id}")

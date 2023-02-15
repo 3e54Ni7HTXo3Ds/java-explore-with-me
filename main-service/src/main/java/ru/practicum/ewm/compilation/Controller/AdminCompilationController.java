@@ -13,8 +13,6 @@ import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
-import static ru.practicum.ewm.compilation.CompilationMapper.toCompilationResponseDto;
-
 
 @RestController
 @Slf4j
@@ -28,14 +26,14 @@ public class AdminCompilationController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CompilationResponseDto createCompilation(@Valid @RequestBody CompilationRequestDto compilationRequestDto) {
-        return toCompilationResponseDto(compilationService.createCompilation(compilationRequestDto));
+        return compilationService.createCompilation(compilationRequestDto);
     }
 
     @PatchMapping("/{id}")
     public CompilationResponseDto updateCompilation(@PathVariable Long id,
                                                     @RequestBody CompilationRequestDto compilationRequestDto)
             throws NotFoundParameterException {
-        return toCompilationResponseDto(compilationService.updateCompilation(id, compilationRequestDto));
+        return compilationService.updateCompilation(id, compilationRequestDto);
     }
 
     @DeleteMapping("/{id}")

@@ -2,14 +2,14 @@ package ru.practicum.ewm.request;
 
 import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
-import ru.practicum.ewm.request.model.Request;
+import ru.practicum.ewm.request.dto.RequestDto;
 
 import java.util.List;
 
 public interface RequestService {
-    Request createRequest(Long userId, Long eventId) throws NotFoundParameterException, ConflictException;
+    RequestDto createRequest(Long userId, Long eventId) throws NotFoundParameterException, ConflictException;
 
-    List<Request> getRequests(Long userId) throws ConflictException;
+    List<RequestDto> getRequests(Long userId) throws ConflictException;
 
-    Request cancelRequest(Long userId, Long requestId) throws ConflictException;
+    RequestDto cancelRequest(Long userId, Long requestId) throws ConflictException;
 }

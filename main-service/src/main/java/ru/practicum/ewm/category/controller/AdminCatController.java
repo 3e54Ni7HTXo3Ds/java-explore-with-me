@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.category.CatMapper;
 import ru.practicum.ewm.category.CatService;
 import ru.practicum.ewm.category.dto.CatDto;
 import ru.practicum.ewm.error.exceptions.ConflictException;
@@ -23,13 +22,13 @@ public class AdminCatController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CatDto create(@Valid @RequestBody CatDto catDto) throws ConflictException {
-        return CatMapper.toCatDto(catService.create(catDto));
+        return (catService.create(catDto));
     }
 
     @PatchMapping("/{id}")
     public CatDto update(@Valid @RequestBody CatDto catDto,
                          @Positive @PathVariable Long id) throws ConflictException {
-        return CatMapper.toCatDto(catService.update(id, catDto));
+        return catService.update(id, catDto);
     }
 
     @DeleteMapping("/{id}")

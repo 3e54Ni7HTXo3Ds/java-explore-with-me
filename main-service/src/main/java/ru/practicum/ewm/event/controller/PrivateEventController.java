@@ -8,13 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.error.exceptions.IncorrectParameterException;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
-import ru.practicum.ewm.event.EventMapper;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventRequestDto;
 import ru.practicum.ewm.event.dto.EventRequestDtoUpdate;
 import ru.practicum.ewm.event.dto.EventResponseDto;
 import ru.practicum.ewm.event.dto.EventResponseDtoShort;
-import ru.practicum.ewm.request.RequestMapper;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.dto.RequestDtoShort;
 import ru.practicum.ewm.request.dto.RequestResponseDtoShort;
@@ -23,9 +21,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static ru.practicum.ewm.event.EventMapper.toEventResponseDto;
 
 @RestController
 @Slf4j
@@ -41,7 +36,7 @@ public class PrivateEventController {
     public EventResponseDto createEvent(@Positive @PathVariable Long userId,
                                         @Valid @RequestBody EventRequestDto eventRequestDto)
             throws NotFoundParameterException, IncorrectParameterException, ConflictException {
-        return toEventResponseDto(eventService.createEvent(userId, eventRequestDto));
+        return eventService.createEvent(userId, eventRequestDto);
     }
 
     @GetMapping
@@ -49,16 +44,14 @@ public class PrivateEventController {
             @Positive @PathVariable Long userId,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
             @Positive @RequestParam(required = false, defaultValue = "10") int size) {
-        return eventService.getEvents(userId, from, size).stream()
-                .map(EventMapper::toEventResponseDtoShort)
-                .collect(Collectors.toList());
+        return eventService.getEvents(userId, from, size);
     }
 
     @GetMapping(path = "/{eventId}")
     public EventResponseDto getEvent(
             @Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId) throws NotFoundParameterException {
-        return toEventResponseDto(eventService.getEvent(userId, eventId,null, null));
+        return eventService.getEvent(userId, eventId,null, null);
     }
 
     @PatchMapping(path = "/{eventId}")
@@ -67,16 +60,14 @@ public class PrivateEventController {
             @Positive @PathVariable Long eventId,
             @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate)
             throws IncorrectParameterException, ConflictException {
-        return toEventResponseDto(eventService.updateEvent(userId, eventId, eventRequestDtoUpdate, false));
+        return eventService.updateEvent(userId, eventId, eventRequestDtoUpdate, false);
     }
 
     @GetMapping(path = "/{eventId}/requests")
     public List<RequestDto> getEventRequests(
             @Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId) throws ConflictException {
-        return eventService.getEventRequests(userId, eventId).stream()
-                .map(RequestMapper::toRequestDto)
-                .collect(Collectors.toList());
+        return eventService.getEventRequests(userId, eventId);
     }
 
     @PatchMapping(path = "/{eventId}/requests")

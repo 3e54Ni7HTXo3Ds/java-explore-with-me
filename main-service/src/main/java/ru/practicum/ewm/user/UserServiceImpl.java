@@ -10,6 +10,9 @@ import ru.practicum.ewm.user.dto.UserRequestDto;
 import ru.practicum.ewm.user.model.User;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.practicum.ewm.user.UserMapper.toUserRequestDto;
 
 @Service
 @Slf4j
@@ -20,13 +23,14 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public User create(UserRequestDto userRequestDto) throws ConflictException {
-        User user = UserMapper.toUser(userRequestDto);
+    public UserRequestDto create(UserRequestDto userRequestDto) throws ConflictException {
+        User user = new User(null, userRequestDto.getName(), userRequestDto.getEmail());
+
         if (userRepository.existsByName(user.getName())) {
             throw new ConflictException("Name exists");
         }
         log.info("User adding: {} ", user);
-        return userRepository.save(user);
+        return toUserRequestDto(userRepository.save(user));
     }
 
     @Override
@@ -40,8 +44,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findUsersByIds(List<Long> ids, PageRequest pageRequest) {
-        return userRepository.getUsersByIdIn(ids, pageRequest);
+    public List<UserRequestDto> findUsersByIds(List<Long> ids, PageRequest pageRequest) {
+        return userRepository.getUsersByIdIn(ids, pageRequest).stream()
+                .map(UserMapper::toUserRequestDto)
+                .collect(Collectors.toList());
     }
-
 }

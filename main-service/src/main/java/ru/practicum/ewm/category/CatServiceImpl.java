@@ -2,7 +2,6 @@ package ru.practicum.ewm.category;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +11,11 @@ import ru.practicum.ewm.error.exceptions.ConflictException;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.event.EventRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static ru.practicum.ewm.category.CatMapper.toCat;
+import static ru.practicum.ewm.category.CatMapper.toCatDto;
 
 @Service
 @Slf4j
@@ -25,16 +28,16 @@ public class CatServiceImpl implements CatService {
     private final EventRepository eventRepository;
 
     @Override
-    public Cat create(CatDto catDto) throws ConflictException {
+    public CatDto create(CatDto catDto) throws ConflictException {
         Cat cat = toCat(catDto);
 
         if (catRepository.existsByName(cat.getName())) throw new ConflictException("Cat name exists");
 
-        return catRepository.save(cat);
+        return toCatDto(catRepository.save(cat));
     }
 
     @Override
-    public Cat update(Long id, CatDto catDto) throws ConflictException {
+    public CatDto update(Long id, CatDto catDto) throws ConflictException {
         Cat cat = toCat(catDto);
         if (!catRepository.existsById(id)) {
             throw new ConflictException("Cat not exists");
@@ -44,25 +47,25 @@ public class CatServiceImpl implements CatService {
             throw new ConflictException("Cat name exists");
         }
         cat.setId(id);
-        return catRepository.save(cat);
+        return toCatDto(catRepository.save(cat));
     }
 
     @Override
     public void delete(Long id) throws ConflictException {
-
         Cat cat = catRepository.findById(id).orElseThrow(new ConflictException("Wrong cat"));
         if (eventRepository.existsByEventCat(cat)) throw new ConflictException("Cat is not empty");
-
         catRepository.deleteById(id);
     }
 
     @Override
-    public Page<Cat> getCatsPageble(PageRequest pageRequest) {
-        return catRepository.findAll(pageRequest);
+    public List<CatDto> getCatsPageble(PageRequest pageRequest) {
+        return catRepository.findAll(pageRequest).stream()
+                .map(CatMapper::toCatDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Cat getCatById(Long id) throws NotFoundParameterException {
-        return catRepository.findById(id).orElseThrow(new NotFoundParameterException("Wrong cat id"));
+    public CatDto getCatById(Long id) throws NotFoundParameterException {
+        return toCatDto(catRepository.findById(id).orElseThrow(new NotFoundParameterException("Wrong cat id")));
     }
 }

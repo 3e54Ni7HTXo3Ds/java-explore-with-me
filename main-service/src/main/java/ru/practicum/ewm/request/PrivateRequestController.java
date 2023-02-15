@@ -9,9 +9,6 @@ import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.request.dto.RequestDto;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static ru.practicum.ewm.request.RequestMapper.toRequestDto;
 
 @RestController
 @Slf4j
@@ -25,19 +22,17 @@ public class PrivateRequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public RequestDto createRequest(@PathVariable Long userId,
                                     @RequestParam Long eventId) throws NotFoundParameterException, ConflictException {
-        return toRequestDto(requestService.createRequest(userId, eventId));
+        return requestService.createRequest(userId, eventId);
     }
 
     @GetMapping
     public List<RequestDto> getRequests(@PathVariable Long userId) throws ConflictException {
-        return requestService.getRequests(userId).stream()
-                .map(RequestMapper::toRequestDto)
-                .collect(Collectors.toList());
+        return requestService.getRequests(userId);
     }
 
     @PatchMapping("/{requestId}/cancel")
     public RequestDto cancelRequest(@PathVariable Long userId,
                                     @PathVariable Long requestId) throws ConflictException {
-        return toRequestDto(requestService.cancelRequest(userId, requestId));
+        return requestService.cancelRequest(userId, requestId);
     }
 }

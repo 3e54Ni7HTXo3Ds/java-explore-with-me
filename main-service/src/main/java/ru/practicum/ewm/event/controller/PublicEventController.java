@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
-import ru.practicum.ewm.event.EventMapper;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventResponseDto;
 import ru.practicum.ewm.stats.client.StatsClient;
@@ -13,9 +12,6 @@ import ru.practicum.ewm.stats.dto.HitResponseDto;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static ru.practicum.ewm.event.EventMapper.toEventResponseDto;
 
 @RestController
 @Slf4j
@@ -35,7 +31,7 @@ public class PublicEventController {
         statsClient.createHit(request);
         List<HitResponseDto> hits = statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
 
-        return toEventResponseDto(eventService.getEvent(null, eventId, hits, request.getRequestURI()));
+        return eventService.getEvent(null, eventId, hits, request.getRequestURI());
     }
 
     @GetMapping
@@ -55,8 +51,6 @@ public class PublicEventController {
         List<HitResponseDto> hits = statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
 
         return eventService.getEventsPublic(
-                        text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, hits, request).stream()
-                .map(EventMapper::toEventResponseDto)
-                .collect(Collectors.toList());
+                        text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, hits, request);
     }
 }

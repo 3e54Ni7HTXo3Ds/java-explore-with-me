@@ -12,11 +12,14 @@ import ru.practicum.ewm.error.exceptions.IncorrectParameterException;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.event.dto.EventRequestDto;
 import ru.practicum.ewm.event.dto.EventRequestDtoUpdate;
+import ru.practicum.ewm.event.dto.EventResponseDto;
+import ru.practicum.ewm.event.dto.EventResponseDtoShort;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.location.LocationRepository;
 import ru.practicum.ewm.location.dto.LocationRequestDto;
 import ru.practicum.ewm.location.model.Location;
+import ru.practicum.ewm.request.RequestMapper;
 import ru.practicum.ewm.request.RequestRepository;
 import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.dto.RequestDtoShort;
@@ -33,8 +36,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
+import static ru.practicum.ewm.event.EventMapper.toEventResponseDto;
 import static ru.practicum.ewm.location.LocationMapper.toLocation;
 import static ru.practicum.ewm.request.RequestMapper.toRequestDto;
 
@@ -52,7 +57,7 @@ public class EventServiceImpl implements EventService {
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public Event createEvent(Long userId, EventRequestDto eventRequestDto)
+    public EventResponseDto createEvent(Long userId, EventRequestDto eventRequestDto)
             throws NotFoundParameterException, ConflictException {
 
         if (!(LocalDateTime.parse(eventRequestDto.getEventDate(), dateTimeFormatter)
@@ -68,19 +73,21 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(new NotFoundParameterException("Wrong user"));
 
         Event event = EventMapper.toEvent(eventRequestDto, eventCat, eventLocation, eventInitiator);
-        return eventRepository.save(event);
+        return toEventResponseDto(eventRepository.save(event));
     }
 
     @Override
-    public List<Event> getEvents(Long userId, int from, int size) {
+    public List<EventResponseDtoShort> getEvents(Long userId, int from, int size) {
         OffsetBasedPageRequest offsetBasedPageRequest =
                 new OffsetBasedPageRequest(from, size, Sort.by("id"));
 
-        return eventRepository.findAllByEventInitiatorId(userId, offsetBasedPageRequest);
+        return eventRepository.findAllByEventInitiatorId(userId, offsetBasedPageRequest).stream()
+                .map(EventMapper::toEventResponseDtoShort)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Event getEvent(Long userId, Long eventId, List<HitResponseDto> hitResponseDtos, String uri)
+    public EventResponseDto getEvent(Long userId, Long eventId, List<HitResponseDto> hitResponseDtos, String uri)
             throws NotFoundParameterException {
 
         Event event = eventRepository.findById(eventId).orElseThrow(new NotFoundParameterException("Wrong event"));
@@ -92,11 +99,11 @@ public class EventServiceImpl implements EventService {
                 if (dto.getUri().equals(uri))
                     event.setEventViews(dto.getHits());
             }
-        return eventRepository.save(event);
+        return toEventResponseDto(eventRepository.save(event));
     }
 
     @Override
-    public Event updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate, Boolean admin)
+    public EventResponseDto updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate, Boolean admin)
             throws IncorrectParameterException, ConflictException {
 
         String annotation = eventRequestDtoUpdate.getAnnotation();
@@ -181,11 +188,11 @@ public class EventServiceImpl implements EventService {
         if (participantLimit != null && participantLimit >= 0) event.setEventLimit(participantLimit);
         if (requestModeration != null) event.setEventRequestModeration(requestModeration);
 
-        return eventRepository.save(event);
+        return toEventResponseDto(eventRepository.save(event));
     }
 
     @Override
-    public List<Event> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories, String rangeStart,
+    public List<EventResponseDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories, String rangeStart,
                                       String rangeEnd, int from, int size) {
         OffsetBasedPageRequest offsetBasedPageRequest =
                 new OffsetBasedPageRequest(from, size, Sort.by("id"));
@@ -196,12 +203,14 @@ public class EventServiceImpl implements EventService {
         if (rangeStart != null) startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
         if (rangeEnd != null) endTime = LocalDateTime.parse(rangeEnd, dateTimeFormatter);
 
-        return eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest);
+        return eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest).stream()
+                .map(EventMapper::toEventResponseDto)
+                .collect(Collectors.toList());
 
     }
 
     @Override
-    public List<Event> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
+    public List<EventResponseDto> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
                                        String rangeEnd, Boolean onlyAvailable, String sort, int from, int size,
                                        List<HitResponseDto> hitResponseDtos,
                                        HttpServletRequest httpServletRequest) {
@@ -231,14 +240,18 @@ public class EventServiceImpl implements EventService {
             list.removeIf(event -> event.getEventConfirmedRequests() >= event.getEventLimit());
         }
 
-        return list;
+        return list.stream()
+                .map(EventMapper::toEventResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Request> getEventRequests(Long userId, Long eventId) throws ConflictException {
+    public List<RequestDto> getEventRequests(Long userId, Long eventId) throws ConflictException {
         userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
         eventRepository.findById(eventId).orElseThrow(new ConflictException("Wrong event"));
-        return requestRepository.findAllByInitiatorId(userId);
+        return requestRepository.findAllByInitiatorId(userId).stream()
+                .map(RequestMapper::toRequestDto)
+                .collect(Collectors.toList());
     }
 
     @Override
