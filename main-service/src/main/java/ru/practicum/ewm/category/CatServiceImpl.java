@@ -52,7 +52,7 @@ public class CatServiceImpl implements CatService {
 
     @Override
     public void delete(Long id) throws ConflictException {
-        Cat cat = catRepository.findById(id).orElseThrow(new ConflictException("Wrong cat"));
+        Cat cat = catRepository.findById(id).orElseThrow(() -> new ConflictException("Wrong cat"));
         if (eventRepository.existsByEventCat(cat)) throw new ConflictException("Cat is not empty");
         catRepository.deleteById(id);
     }
@@ -66,6 +66,6 @@ public class CatServiceImpl implements CatService {
 
     @Override
     public CatDto getCatById(Long id) throws NotFoundParameterException {
-        return toCatDto(catRepository.findById(id).orElseThrow(new NotFoundParameterException("Wrong cat id")));
+        return toCatDto(catRepository.findById(id).orElseThrow(() -> new NotFoundParameterException("Wrong cat id")));
     }
 }

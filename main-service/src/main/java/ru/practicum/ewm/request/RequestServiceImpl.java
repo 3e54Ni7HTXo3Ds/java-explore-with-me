@@ -32,8 +32,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public RequestDto createRequest(Long userId, Long eventId) throws ConflictException {
 
-        Event event = eventRepository.findById(eventId).orElseThrow(new ConflictException("Wrong event"));
-        User requester = userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ConflictException("Wrong event"));
+        User requester = userRepository.findById(userId).orElseThrow(() -> new ConflictException("Wrong user"));
 
         if (requester.equals(event.getEventInitiator())) throw new ConflictException("Wrong user");
 
@@ -61,7 +61,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> getRequests(Long userId) throws ConflictException {
-        userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
+        userRepository.findById(userId).orElseThrow(() -> new ConflictException("Wrong user"));
         return requestRepository.findAllByRequesterId(userId).stream()
                 .map(RequestMapper::toRequestDto)
                 .collect(Collectors.toList());
@@ -69,8 +69,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestDto cancelRequest(Long userId, Long requestId) throws ConflictException {
-        userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
-        Request request = requestRepository.findById(requestId).orElseThrow(new ConflictException("Wrong request"));
+        userRepository.findById(userId).orElseThrow(() -> new ConflictException("Wrong user"));
+        Request request = requestRepository.findById(requestId).orElseThrow(() -> new ConflictException("Wrong request"));
         request.setStatus(String.valueOf(RequestState.CANCELED));
         return toRequestDto(requestRepository.save(request));
     }

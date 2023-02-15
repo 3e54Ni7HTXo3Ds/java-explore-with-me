@@ -65,12 +65,12 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("Event must be at least 2 ours later");
 
         Cat eventCat = catRepository.findById(eventRequestDto.getCategory())
-                .orElseThrow(new NotFoundParameterException("Wrong cat"));
+                .orElseThrow(() -> new NotFoundParameterException("Wrong cat"));
 
         Location eventLocation = locationRepository.save(toLocation(eventRequestDto.getLocation()));
 
         User eventInitiator = userRepository.findById(userId)
-                .orElseThrow(new NotFoundParameterException("Wrong user"));
+                .orElseThrow(() -> new NotFoundParameterException("Wrong user"));
 
         Event event = EventMapper.toEvent(eventRequestDto, eventCat, eventLocation, eventInitiator);
         return toEventResponseDto(eventRepository.save(event));
@@ -90,7 +90,7 @@ public class EventServiceImpl implements EventService {
     public EventResponseDto getEvent(Long userId, Long eventId, List<HitResponseDto> hitResponseDtos, String uri)
             throws NotFoundParameterException {
 
-        Event event = eventRepository.findById(eventId).orElseThrow(new NotFoundParameterException("Wrong event"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundParameterException("Wrong event"));
 
         event.setEventConfirmedRequests(
                 requestRepository.countAllByEventIdAndStatus(eventId, RequestState.CONFIRMED.toString()));
@@ -119,7 +119,7 @@ public class EventServiceImpl implements EventService {
 
 
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(new IncorrectParameterException("Event with id=" + eventId + " was not found"));
+                .orElseThrow(() -> new IncorrectParameterException("Event with id=" + eventId + " was not found"));
 
         if (!admin && userId != null) {
             if (!userId.equals(event.getEventInitiator().getId()) ||
@@ -127,7 +127,7 @@ public class EventServiceImpl implements EventService {
                 throw new ConflictException("Wrong user or published event");
 
             userRepository.findById(userId)
-                    .orElseThrow(new IncorrectParameterException("User with id=" + userId + " was not found"));
+                    .orElseThrow(() -> new IncorrectParameterException("User with id=" + userId + " was not found"));
         }
 
         if (stateAction != null) {
@@ -247,8 +247,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<RequestDto> getEventRequests(Long userId, Long eventId) throws ConflictException {
-        userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
-        eventRepository.findById(eventId).orElseThrow(new ConflictException("Wrong event"));
+        userRepository.findById(userId).orElseThrow(() -> new ConflictException("Wrong user"));
+        eventRepository.findById(eventId).orElseThrow(() -> new ConflictException("Wrong event"));
         return requestRepository.findAllByInitiatorId(userId).stream()
                 .map(RequestMapper::toRequestDto)
                 .collect(Collectors.toList());
@@ -257,8 +257,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public RequestResponseDtoShort updateEventRequests(Long userId, Long eventId, RequestDtoShort requestDtoShort)
             throws ConflictException {
-        userRepository.findById(userId).orElseThrow(new ConflictException("Wrong user"));
-        Event event = eventRepository.findById(eventId).orElseThrow(new ConflictException("Wrong event"));
+        userRepository.findById(userId).orElseThrow(() -> new ConflictException("Wrong user"));
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ConflictException("Wrong event"));
         Long eventLimit = event.getEventLimit();
         Long confirmed = event.getEventConfirmedRequests();
 

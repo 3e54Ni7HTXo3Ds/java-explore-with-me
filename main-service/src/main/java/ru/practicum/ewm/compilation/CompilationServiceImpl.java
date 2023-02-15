@@ -39,7 +39,7 @@ public class CompilationServiceImpl implements CompilationService {
             throws NotFoundParameterException {
 
         Compilation compilation =
-                compilationRepository.findById(id).orElseThrow(new NotFoundParameterException("Wrong compilation"));
+                compilationRepository.findById(id).orElseThrow(() -> new NotFoundParameterException("Wrong compilation"));
         compilation.setEventList(eventRepository.findAllById(compilationRequestDto.getEvents()));
         compilation.setTitle(compilationRequestDto.getTitle());
         compilation.setPinned(compilationRequestDto.getPinned());
@@ -63,6 +63,6 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationResponseDto getCompilation(Long id) throws NotFoundParameterException {
         return toCompilationResponseDto(
-                compilationRepository.findById(id).orElseThrow(new NotFoundParameterException("Not found")));
+                compilationRepository.findById(id).orElseThrow(() -> new NotFoundParameterException("Not found")));
     }
 }
