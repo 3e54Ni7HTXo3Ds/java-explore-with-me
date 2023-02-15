@@ -61,8 +61,9 @@ public class EventServiceImpl implements EventService {
             throws NotFoundParameterException, ConflictException {
 
         if (!(LocalDateTime.parse(eventRequestDto.getEventDate(), dateTimeFormatter)
-                .isAfter(LocalDateTime.now().plusHours(2))))
+                .isAfter(LocalDateTime.now().plusHours(2)))) {
             throw new ConflictException("Event must be at least 2 ours later");
+        }
 
         Cat eventCat = catRepository.findById(eventRequestDto.getCategory())
                 .orElseThrow(() -> new NotFoundParameterException("Wrong cat"));
@@ -90,20 +91,23 @@ public class EventServiceImpl implements EventService {
     public EventResponseDto getEvent(Long userId, Long eventId, List<HitResponseDto> hitResponseDtos, String uri)
             throws NotFoundParameterException {
 
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundParameterException("Wrong event"));
+        Event event =
+                eventRepository.findById(eventId).orElseThrow(() -> new NotFoundParameterException("Wrong event"));
 
         event.setEventConfirmedRequests(
                 requestRepository.countAllByEventIdAndStatus(eventId, RequestState.CONFIRMED.toString()));
-        if (hitResponseDtos != null && !hitResponseDtos.isEmpty())
+        if (hitResponseDtos != null && !hitResponseDtos.isEmpty()) {
             for (HitResponseDto dto : hitResponseDtos) {
                 if (dto.getUri().equals(uri))
                     event.setEventViews(dto.getHits());
             }
+        }
         return toEventResponseDto(eventRepository.save(event));
     }
 
     @Override
-    public EventResponseDto updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate, Boolean admin)
+    public EventResponseDto updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate,
+                                        Boolean admin)
             throws IncorrectParameterException, ConflictException {
 
         String annotation = eventRequestDtoUpdate.getAnnotation();
@@ -160,11 +164,13 @@ public class EventServiceImpl implements EventService {
         if (eventDate != null) {
             LocalDateTime eventDateTime = LocalDateTime.parse(eventDate, dateTimeFormatter);
 
-            if (admin && !(eventDateTime).isAfter(LocalDateTime.now().plusHours(1)))
+            if (admin && !(eventDateTime).isAfter(LocalDateTime.now().plusHours(1))) {
                 throw new ConflictException("Event must be at least 1 ours later");
+            }
 
-            if (!admin && !(eventDateTime).isAfter(LocalDateTime.now().plusHours(2)))
+            if (!admin && !(eventDateTime).isAfter(LocalDateTime.now().plusHours(2))) {
                 throw new ConflictException("Event must be at least 2 ours later");
+            }
 
             event.setEventDate(eventDateTime);
         }
@@ -181,29 +187,47 @@ public class EventServiceImpl implements EventService {
             event.setEventLocation(newEventLocation);
         }
 
-        if (annotation != null) event.setEventAnnotation(annotation);
-        if (description != null) event.setEventDescription(description);
-        if (title != null) event.setEventTitle(title);
-        if (paid != null) event.setEventPaid(paid);
-        if (participantLimit != null && participantLimit >= 0) event.setEventLimit(participantLimit);
-        if (requestModeration != null) event.setEventRequestModeration(requestModeration);
+        if (annotation != null) {
+            event.setEventAnnotation(annotation);
+        }
+        if (description != null) {
+            event.setEventDescription(description);
+        }
+        if (title != null) {
+            event.setEventTitle(title);
+        }
+        if (paid != null) {
+            event.setEventPaid(paid);
+        }
+        if (participantLimit != null && participantLimit >= 0) {
+            event.setEventLimit(participantLimit);
+        }
+        if (requestModeration != null) {
+            event.setEventRequestModeration(requestModeration);
+        }
 
         return toEventResponseDto(eventRepository.save(event));
     }
 
     @Override
-    public List<EventResponseDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories, String rangeStart,
-                                      String rangeEnd, int from, int size) {
+    public List<EventResponseDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
+                                                 String rangeStart,
+                                                 String rangeEnd, int from, int size) {
         OffsetBasedPageRequest offsetBasedPageRequest =
                 new OffsetBasedPageRequest(from, size, Sort.by("id"));
 
         LocalDateTime startTime = null;
         LocalDateTime endTime = null;
 
-        if (rangeStart != null) startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
-        if (rangeEnd != null) endTime = LocalDateTime.parse(rangeEnd, dateTimeFormatter);
+        if (rangeStart != null) {
+            startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
+        }
+        if (rangeEnd != null) {
+            endTime = LocalDateTime.parse(rangeEnd, dateTimeFormatter);
+        }
 
-        return eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest).stream()
+        return eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest)
+                .stream()
                 .map(EventMapper::toEventResponseDto)
                 .collect(Collectors.toList());
 
@@ -211,9 +235,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventResponseDto> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                       String rangeEnd, Boolean onlyAvailable, String sort, int from, int size,
-                                       List<HitResponseDto> hitResponseDtos,
-                                       HttpServletRequest httpServletRequest) {
+                                                  String rangeEnd, Boolean onlyAvailable, String sort, int from,
+                                                  int size,
+                                                  List<HitResponseDto> hitResponseDtos,
+                                                  HttpServletRequest httpServletRequest) {
 
         if ("VIEWS".equals(sort)) {
             sort = "eventViews";
@@ -227,11 +252,19 @@ public class EventServiceImpl implements EventService {
         LocalDateTime startTime;
         LocalDateTime endTime;
 
-        if (rangeStart != null) startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
-        else startTime = LocalDateTime.now();
-        if (rangeEnd != null) endTime = LocalDateTime.parse(rangeEnd, dateTimeFormatter);
-        else endTime = LocalDateTime.now().plusYears(100);
-        if (text != null) text = text.toLowerCase();
+        if (rangeStart != null) {
+            startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
+        } else {
+            startTime = LocalDateTime.now();
+        }
+        if (rangeEnd != null) {
+            endTime = LocalDateTime.parse(rangeEnd, dateTimeFormatter);
+        } else {
+            endTime = LocalDateTime.now().plusYears(100);
+        }
+        if (text != null) {
+            text = text.toLowerCase();
+        }
 
         List<Event> list = eventRepository.findEventsPublic(text, categories, paid, startTime, endTime,
                 onlyAvailable, offsetBasedPageRequest);
@@ -262,7 +295,9 @@ public class EventServiceImpl implements EventService {
         Long eventLimit = event.getEventLimit();
         Long confirmed = event.getEventConfirmedRequests();
 
-        if (Objects.equals(eventLimit, confirmed)) throw new ConflictException("No place");
+        if (Objects.equals(eventLimit, confirmed)) {
+            throw new ConflictException("No place");
+        }
 
         List<RequestDto> confirmedRequests = new ArrayList<>();
         List<RequestDto> rejectedRequests = new ArrayList<>();
@@ -274,7 +309,9 @@ public class EventServiceImpl implements EventService {
         List<Request> allInitiatorPendingRequests =
                 requestRepository.findAllByIdInAndStatus(ids, RequestState.PENDING.toString());
 
-        if (ids.size() != allInitiatorPendingRequests.size()) throw new ConflictException("Only PENDING");
+        if (ids.size() != allInitiatorPendingRequests.size()) {
+            throw new ConflictException("Only PENDING");
+        }
 
         if (allInitiatorPendingRequests.isEmpty() || (!event.getEventRequestModeration() || eventLimit == 0)) {
             return requestResponseDtoShort;
