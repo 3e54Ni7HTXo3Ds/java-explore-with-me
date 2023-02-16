@@ -9,16 +9,13 @@ import java.util.List;
 
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Long> {
-    List<Request> getAllByEventIdAndStatusIn(Long eventId, List<String> statuses);
 
-    List<Request> getAllByEventInAndStatus(List<Event> eventId, String status);
+    List<Request> getAllByEventInAndStatusIn(List<Event> eventId, List<String> statuses);
 
     Boolean existsByRequesterIdAndEventId(Long userId, Long id);
 
     List<Request> findAllByRequesterId(Long userId);
 
     List<Request> findAllByInitiatorId(Long userId);
-
-    Long countAllByEventIdAndStatus(Long id, String status);
 
 }

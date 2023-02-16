@@ -26,10 +26,12 @@ import ru.practicum.ewm.request.dto.RequestDtoShort;
 import ru.practicum.ewm.request.dto.RequestResponseDtoShort;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.model.RequestState;
+import ru.practicum.ewm.stats.client.StatsClient;
 import ru.practicum.ewm.stats.dto.HitResponseDto;
 import ru.practicum.ewm.user.UserRepository;
 import ru.practicum.ewm.user.model.User;
 
+import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,6 +49,7 @@ import static ru.practicum.ewm.request.RequestMapper.toRequestDto;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
+@PersistenceContext
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
@@ -55,6 +58,8 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
     private final RequestRepository requestRepository;
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private final StatsClient statsClient;
 
     @Override
     public EventResponseDto createEvent(Long userId, EventRequestDto eventRequestDto)
@@ -82,23 +87,29 @@ public class EventServiceImpl implements EventService {
         OffsetBasedPageRequest offsetBasedPageRequest =
                 new OffsetBasedPageRequest(from, size, Sort.by("id"));
 
-        return eventRepository.findAllByEventInitiatorId(userId, offsetBasedPageRequest).stream()
+        List<Event> list = eventRepository.findAllByEventInitiatorId(userId, offsetBasedPageRequest);
+        setConfirmedRequests(list);
+
+        return list.stream()
                 .map(EventMapper::toEventResponseDtoShort)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public EventResponseDto getEvent(Long userId, Long eventId, List<HitResponseDto> hitResponseDtos, String uri)
+    public EventResponseDto getEvent(Long userId, Long eventId, HttpServletRequest request)
             throws NotFoundParameterException {
 
         Event event =
                 eventRepository.findById(eventId).orElseThrow(() -> new NotFoundParameterException("Wrong event"));
 
-        event.setEventConfirmedRequests(
-                requestRepository.countAllByEventIdAndStatus(eventId, RequestState.CONFIRMED.toString()));
+        setConfirmedRequests(List.of(event));
+
+        List<HitResponseDto> hitResponseDtos =
+                statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
+
         if (hitResponseDtos != null && !hitResponseDtos.isEmpty()) {
             for (HitResponseDto dto : hitResponseDtos) {
-                if (dto.getUri().equals(uri))
+                if (dto.getUri().equals(request.getRequestURI()))
                     event.setEventViews(dto.getHits());
             }
         }
@@ -109,6 +120,9 @@ public class EventServiceImpl implements EventService {
     public EventResponseDto updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate,
                                         Boolean admin)
             throws IncorrectParameterException, ConflictException {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new IncorrectParameterException("Event with id=" + eventId + " was not found"));
+        setConfirmedRequests(List.of(event));
 
         String annotation = eventRequestDtoUpdate.getAnnotation();
         Long category = eventRequestDtoUpdate.getCategory();
@@ -120,10 +134,6 @@ public class EventServiceImpl implements EventService {
         Boolean requestModeration = eventRequestDtoUpdate.getRequestModeration();
         String stateAction = eventRequestDtoUpdate.getStateAction();
         String title = eventRequestDtoUpdate.getTitle();
-
-
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new IncorrectParameterException("Event with id=" + eventId + " was not found"));
 
         if (!admin && userId != null) {
             if (!userId.equals(event.getEventInitiator().getId()) ||
@@ -226,18 +236,40 @@ public class EventServiceImpl implements EventService {
             endTime = LocalDateTime.parse(rangeEnd, dateTimeFormatter);
         }
 
-        return eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest)
-                .stream()
-                .map(EventMapper::toEventResponseDto)
-                .collect(Collectors.toList());
+        List<Event> list =
+                eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest);
 
+        setConfirmedRequests(list);
+
+        return
+                list.stream()
+                        .map(EventMapper::toEventResponseDto)
+                        .collect(Collectors.toList());
+
+    }
+
+    private void setConfirmedRequests(List<Event> list) {
+
+        List<Request> confirmedList =
+                requestRepository.getAllByEventInAndStatusIn(list, List.of(RequestState.CONFIRMED.toString()));
+
+        long eventConfirmedRequests;
+        for (Event event : list) {
+            eventConfirmedRequests = 0L;
+            for (Request request : confirmedList) {
+                if (request.getEvent().equals(event)) {
+                    eventConfirmedRequests++;
+                    confirmedList.remove(request);
+                }
+            }
+            event.setEventConfirmedRequests(eventConfirmedRequests);
+        }
     }
 
     @Override
     public List<EventResponseDto> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
                                                   String rangeEnd, Boolean onlyAvailable, String sort, int from,
                                                   int size,
-                                                  List<HitResponseDto> hitResponseDtos,
                                                   HttpServletRequest httpServletRequest) {
 
         if ("VIEWS".equals(sort)) {
@@ -251,7 +283,7 @@ public class EventServiceImpl implements EventService {
 
         LocalDateTime startTime;
         LocalDateTime endTime;
-        Long eventConfirmedRequests;
+
 
         if (rangeStart != null) {
             startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
@@ -270,19 +302,7 @@ public class EventServiceImpl implements EventService {
         List<Event> list = eventRepository.findEventsPublic(text, categories, paid, startTime, endTime,
                 offsetBasedPageRequest);
 
-        List<Request> confirmedList =
-                requestRepository.getAllByEventInAndStatus(list, RequestState.CONFIRMED.toString());
-
-        for (Event event : list) {
-            eventConfirmedRequests = 0L;
-            for (Request request : confirmedList) {
-                if (request.getEvent().equals(event)) {
-                    eventConfirmedRequests++;
-                    confirmedList.remove(request);
-                }
-            }
-            event.setEventConfirmedRequests(eventConfirmedRequests);
-        }
+        setConfirmedRequests(list);
 
         if (onlyAvailable) {
             list.removeIf(event -> (event.getEventConfirmedRequests() >= event.getEventLimit() &&
@@ -319,8 +339,8 @@ public class EventServiceImpl implements EventService {
         RequestResponseDtoShort requestResponseDtoShort =
                 new RequestResponseDtoShort(confirmedRequests, rejectedRequests);
 
-        List<Request> requests = requestRepository.getAllByEventIdAndStatusIn(eventId,
-                List.of(RequestState.CONFIRMED.toString(), RequestState.PENDING.toString())); // Ходим 1 раз в базу
+        List<Request> requests = requestRepository.getAllByEventInAndStatusIn(List.of(event),
+                List.of(RequestState.CONFIRMED.toString(), RequestState.PENDING.toString()));
 
         for (Request request : requests) {            // раскладываем подтвержденные и те, которые можно менять
             if (request.getStatus().equals(RequestState.CONFIRMED.toString())) {
@@ -348,7 +368,7 @@ public class EventServiceImpl implements EventService {
                     }
                     break;
                 }
-                request.setStatus(RequestState.CONFIRMED.toString());                   //подтверждаем
+                request.setStatus(RequestState.CONFIRMED.toString());                   //подтверждаем если лимит есть
                 confirmedRequests.add(toRequestDto(request));
                 confirmed++;
 

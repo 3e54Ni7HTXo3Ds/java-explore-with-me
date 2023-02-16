@@ -17,6 +17,7 @@ import ru.practicum.ewm.request.dto.RequestDto;
 import ru.practicum.ewm.request.dto.RequestDtoShort;
 import ru.practicum.ewm.request.dto.RequestResponseDtoShort;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -50,8 +51,9 @@ public class PrivateEventController {
     @GetMapping(path = "/{eventId}")
     public EventResponseDto getEvent(
             @Positive @PathVariable Long userId,
-            @Positive @PathVariable Long eventId) throws NotFoundParameterException {
-        return eventService.getEvent(userId, eventId,null, null);
+            @Positive @PathVariable Long eventId,
+            HttpServletRequest request) throws NotFoundParameterException {
+        return eventService.getEvent(userId, eventId, request);
     }
 
     @PatchMapping(path = "/{eventId}")

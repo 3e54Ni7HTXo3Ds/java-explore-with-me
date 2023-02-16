@@ -17,7 +17,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Boolean existsByEventCat(Cat cat);
 
-    @Query("SELECT E FROM Event E " +
+    @Query("SELECT E " +
+            "FROM Event E " +
             "WHERE ((:users) IS NULL OR E.eventInitiator.id IN (:users)) " +
             "AND ((:states) IS NULL OR E.eventState IN (:states)) " +
             "AND ((:categories) IS NULL OR E.eventCat.id IN (:categories)) " +

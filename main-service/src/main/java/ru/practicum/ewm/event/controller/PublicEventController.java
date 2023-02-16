@@ -7,7 +7,6 @@ import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventResponseDto;
 import ru.practicum.ewm.stats.client.StatsClient;
-import ru.practicum.ewm.stats.dto.HitResponseDto;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
@@ -29,9 +28,9 @@ public class PublicEventController {
             HttpServletRequest request) throws NotFoundParameterException {
 
         statsClient.createHit(request);
-        List<HitResponseDto> hits = statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
+        // List<HitResponseDto> hits =
 
-        return eventService.getEvent(null, eventId, hits, request.getRequestURI());
+        return eventService.getEvent(null, eventId, request);
     }
 
     @GetMapping
@@ -48,9 +47,9 @@ public class PublicEventController {
             HttpServletRequest request) {
 
         statsClient.createHit(request);
-        List<HitResponseDto> hits = statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
+      //  List<HitResponseDto> hits = statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
 
         return eventService.getEventsPublic(
-                        text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, hits, request);
+                        text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
     }
 }
