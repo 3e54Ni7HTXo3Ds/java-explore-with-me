@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventResponseDto;
-import ru.practicum.ewm.stats.client.StatsClient;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
@@ -20,17 +19,12 @@ public class PublicEventController {
 
     private final EventService eventService;
 
-    private final StatsClient statsClient;
-
     @GetMapping(path = "/{eventId}")
     public EventResponseDto getEventPublic(
             @Positive @PathVariable Long eventId,
-            HttpServletRequest request) throws NotFoundParameterException {
+            HttpServletRequest httpServletRequest) throws NotFoundParameterException {
 
-        statsClient.createHit(request);
-        // List<HitResponseDto> hits =
-
-        return eventService.getEvent(null, eventId, request);
+        return eventService.getEvent(null, eventId, httpServletRequest);
     }
 
     @GetMapping
@@ -44,12 +38,9 @@ public class PublicEventController {
             @RequestParam(required = false, defaultValue = "EVENT_DATE") String sort,
             @RequestParam(required = false, defaultValue = "0") int from,
             @RequestParam(required = false, defaultValue = "10") int size,
-            HttpServletRequest request) {
-
-        statsClient.createHit(request);
-      //  List<HitResponseDto> hits = statsClient.getHits(null, null, request.getRequestURI(), false).getBody();
+            HttpServletRequest httpServletRequest) {
 
         return eventService.getEventsPublic(
-                        text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, httpServletRequest);
     }
 }

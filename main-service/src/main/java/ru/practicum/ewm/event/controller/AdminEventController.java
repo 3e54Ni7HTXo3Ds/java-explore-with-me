@@ -10,6 +10,7 @@ import ru.practicum.ewm.event.EventService;
 import ru.practicum.ewm.event.dto.EventRequestDtoUpdate;
 import ru.practicum.ewm.event.dto.EventResponseDto;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.List;
@@ -27,10 +28,10 @@ public class AdminEventController {
     @PatchMapping(path = "/{eventId}")
     public EventResponseDto updateEventAdmin(
             @Positive @PathVariable Long eventId,
-            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate
+            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate, HttpServletRequest httpServletRequest
     )
             throws IncorrectParameterException, ConflictException {
-        return eventService.updateEvent(null, eventId, eventRequestDtoUpdate, true);
+        return eventService.updateEvent(null, eventId, eventRequestDtoUpdate, true, httpServletRequest);
     }
 
     @GetMapping
@@ -41,8 +42,10 @@ public class AdminEventController {
             @RequestParam(required = false) String rangeStart,
             @RequestParam(required = false) String rangeEnd,
             @RequestParam(required = false, defaultValue = "0") int from,
-            @RequestParam(required = false, defaultValue = "10") int size) {
-        return eventService.getEventsAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+            @RequestParam(required = false, defaultValue = "10") int size,
+            HttpServletRequest httpServletRequest) {
+        return eventService.getEventsAdmin(users, states, categories, rangeStart, rangeEnd, from, size,
+                httpServletRequest);
     }
 
 

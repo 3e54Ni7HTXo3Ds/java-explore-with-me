@@ -18,21 +18,22 @@ public interface EventService {
     EventResponseDto createEvent(Long userId, EventRequestDto eventRequestDto)
             throws NotFoundParameterException, IncorrectParameterException, ConflictException;
 
-    List<EventResponseDtoShort> getEvents(Long userId, int from, int size);
+    List<EventResponseDtoShort> getEvents(Long userId, int from, int size, HttpServletRequest httpServletRequest);
 
     EventResponseDto getEvent(Long userId, Long eventId, HttpServletRequest request)
             throws NotFoundParameterException;
 
-    EventResponseDto updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate, Boolean admin)
+    EventResponseDto updateEvent(Long userId, Long eventId, EventRequestDtoUpdate eventRequestDtoUpdate, Boolean admin,
+                                 HttpServletRequest httpServletRequest)
             throws IncorrectParameterException, ConflictException;
 
-    List<EventResponseDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories, String rangeStart,
-                               String rangeEnd, int from, int size);
+    List<EventResponseDto> getEventsAdmin(List<Long> users, List<String> states, List<Long> categories,
+                                          String rangeStart,
+                                          String rangeEnd, int from, int size, HttpServletRequest httpServletRequest);
 
-    List<EventResponseDto> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
-                                Boolean onlyAvailable, String sort, int from, int size,
-
-                                HttpServletRequest httpServletRequest);
+    List<EventResponseDto> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
+                                           String rangeEnd, Boolean onlyAvailable, String sort, int from, int size,
+                                           HttpServletRequest httpServletRequest);
 
     List<RequestDto> getEventRequests(Long userId, Long eventId) throws ConflictException;
 

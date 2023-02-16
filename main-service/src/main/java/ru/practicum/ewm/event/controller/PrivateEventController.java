@@ -44,25 +44,26 @@ public class PrivateEventController {
     public List<EventResponseDtoShort> getEvents(
             @Positive @PathVariable Long userId,
             @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
-            @Positive @RequestParam(required = false, defaultValue = "10") int size) {
-        return eventService.getEvents(userId, from, size);
+            @Positive @RequestParam(required = false, defaultValue = "10") int size,
+            HttpServletRequest httpServletRequest) {
+        return eventService.getEvents(userId, from, size, httpServletRequest);
     }
 
     @GetMapping(path = "/{eventId}")
     public EventResponseDto getEvent(
             @Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId,
-            HttpServletRequest request) throws NotFoundParameterException {
-        return eventService.getEvent(userId, eventId, request);
+            HttpServletRequest httpServletRequest) throws NotFoundParameterException {
+        return eventService.getEvent(userId, eventId, httpServletRequest);
     }
 
     @PatchMapping(path = "/{eventId}")
     public EventResponseDto updateEvent(
             @Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId,
-            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate)
+            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate, HttpServletRequest httpServletRequest)
             throws IncorrectParameterException, ConflictException {
-        return eventService.updateEvent(userId, eventId, eventRequestDtoUpdate, false);
+        return eventService.updateEvent(userId, eventId, eventRequestDtoUpdate, false, httpServletRequest);
     }
 
     @GetMapping(path = "/{eventId}/requests")
