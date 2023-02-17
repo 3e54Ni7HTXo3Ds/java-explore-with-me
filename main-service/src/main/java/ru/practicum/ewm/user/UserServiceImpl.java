@@ -12,6 +12,7 @@ import ru.practicum.ewm.user.model.User;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.ewm.user.UserMapper.toUser;
 import static ru.practicum.ewm.user.UserMapper.toUserRequestDto;
 
 @Service
@@ -24,8 +25,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserRequestDto create(UserRequestDto userRequestDto) throws ConflictException {
-        User user = new User(null, userRequestDto.getName(), userRequestDto.getEmail());
-
+        User user = toUser(userRequestDto);
         if (userRepository.existsByName(user.getName())) {
             throw new ConflictException("Name exists");
         }
