@@ -36,12 +36,12 @@ public class StatsServiceImpl implements StatsService {
         LocalDateTime endTime = LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         if (unique) {
-            if (uris == null || uris.isEmpty()) {
+            if (uris.isEmpty()) {
                 return statsRepository.findAllUniqueHits(startTime, endTime);
             }
             return statsRepository.findAllUniqueHitsByUriIn(startTime, endTime, uris);
         } else {
-            if (uris == null || uris.isEmpty()) {
+            if (uris.isEmpty()) {
                 return statsRepository.findAllHits(startTime, endTime);
             }
             return statsRepository.findAllHitsByUriIn(startTime, endTime, uris);
