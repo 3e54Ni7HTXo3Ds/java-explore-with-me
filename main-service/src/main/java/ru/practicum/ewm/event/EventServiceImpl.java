@@ -364,20 +364,22 @@ public class EventServiceImpl implements EventService {
 
     private void addConfirmedRequests(List<Event> list) {
 
-        List<Request> confirmedList =
-                requestRepository.getAllByEventInAndStatusIn(list, List.of(RequestState.CONFIRMED.toString()));
+        if (list != null && !list.isEmpty()) {
+            List<Request> confirmedList =
+                    requestRepository.getAllByEventInAndStatusIn(list, List.of(RequestState.CONFIRMED.toString()));
 
-        long eventConfirmedRequests;
-        for (Event event : list) {
-
-            eventConfirmedRequests = 0L;
-            for (Request request : confirmedList) {
-                if (request.getEvent().equals(event)) {
-                    eventConfirmedRequests++;
-                    confirmedList.remove(request);
+            long eventConfirmedRequests;
+            if (confirmedList != null && !confirmedList.isEmpty()) {
+                for (Event event : list) {
+                    eventConfirmedRequests = 0L;
+                    for (Request request : confirmedList) {
+                        if (request.getEvent().equals(event)) {
+                            eventConfirmedRequests++;
+                        }
+                    }
+                    event.setEventConfirmedRequests(eventConfirmedRequests);
                 }
             }
-            event.setEventConfirmedRequests(eventConfirmedRequests);
         }
     }
 
