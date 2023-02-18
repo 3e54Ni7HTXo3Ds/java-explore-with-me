@@ -36,7 +36,16 @@ public class StatsClient extends BaseClient {
                 LocalDateTime.now()));
     }
 
-    public ResponseEntity<List<HitResponseDto>> getHits(String start, String end, String uris, Boolean unique) {
+    public void createHit(HttpServletRequest httpServletRequest, String uri) {
+        post(new HitRequestDto(
+                "ewm-main-service",
+                uri,
+                httpServletRequest.getRemoteAddr(),
+                LocalDateTime.now()));
+    }
+
+    public ResponseEntity<HitResponseDto[]> getHits(String start, String end, List<String> uris,
+                                         Boolean unique) {
         if (start == null) {
             start = LocalDateTime.of(1970, 1, 1, 1, 1)
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));

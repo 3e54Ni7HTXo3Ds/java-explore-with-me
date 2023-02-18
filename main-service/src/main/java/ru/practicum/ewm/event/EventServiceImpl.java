@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -89,7 +90,7 @@ public class EventServiceImpl implements EventService {
                 new OffsetBasedPageRequest(from, size, Sort.by("id"));
 
         List<Event> list = eventRepository.findAllByEventInitiatorId(userId, offsetBasedPageRequest);
-        setConfirmedRequestsAndViews(list, httpServletRequest);
+        setConfirmedRequests(list, httpServletRequest);
 
         return list.stream()
                 .map(EventMapper::toEventResponseDtoShort)
@@ -104,7 +105,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundParameterException("Wrong event"));
 
         statsClient.createHit(httpServletRequest);
-        setConfirmedRequestsAndViews(List.of(event), httpServletRequest);
+        setConfirmedRequests(List.of(event), httpServletRequest);
 
         return toEventResponseDto(eventRepository.save(event));
     }
@@ -115,7 +116,7 @@ public class EventServiceImpl implements EventService {
             throws IncorrectParameterException, ConflictException {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IncorrectParameterException("Event with id=" + eventId + " was not found"));
-        setConfirmedRequestsAndViews(List.of(event), httpServletRequest);
+        setConfirmedRequests(List.of(event), httpServletRequest);
 
         String annotation = eventRequestDtoUpdate.getAnnotation();
         Long category = eventRequestDtoUpdate.getCategory();
@@ -233,7 +234,7 @@ public class EventServiceImpl implements EventService {
         List<Event> list =
                 eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest);
 
-        setConfirmedRequestsAndViews(list, httpServletRequest);
+        setConfirmedRequests(list, httpServletRequest);
 
         return list.stream()
                 .map(EventMapper::toEventResponseDto)
@@ -241,12 +242,13 @@ public class EventServiceImpl implements EventService {
 
     }
 
-    private void setConfirmedRequestsAndViews(List<Event> list, HttpServletRequest httpServletRequest) {
+    private void setConfirmedRequests(List<Event> list, HttpServletRequest httpServletRequest) {
 
         List<Request> confirmedList =
                 requestRepository.getAllByEventInAndStatusIn(list, List.of(RequestState.CONFIRMED.toString()));
-        List<HitResponseDto> hitResponseDtos =
-                statsClient.getHits(null, null, httpServletRequest.getRequestURI(), false).getBody();
+
+//        List<HitResponseDto> hitResponseDtos =
+//                statsClient.getHits(null, null, httpServletRequest.getRequestURI(), false).getBody();
 
         long eventConfirmedRequests;
         for (Event event : list) {
@@ -260,18 +262,57 @@ public class EventServiceImpl implements EventService {
             }
             event.setEventConfirmedRequests(eventConfirmedRequests);
 
-            if (hitResponseDtos != null && !hitResponseDtos.isEmpty()) {
-                for (HitResponseDto dto : hitResponseDtos) {
-                    if (dto.getUri().equals(httpServletRequest.getRequestURI())) {
-                        event.setEventViews(dto.getHits());
-                     //   hitResponseDtos.remove(dto);
-                    }
+//            if (hitResponseDtos != null && !hitResponseDtos.isEmpty()) {
+//                for (HitResponseDto dto : hitResponseDtos) {
+//                    if (dto.getUri().equals(httpServletRequest.getRequestURI())) {
+//                        event.setEventViews(dto.getHits());
+//                     //   hitResponseDtos.remove(dto);
+//                    }
+//                }
+//            }
+        }
+    }
+
+    private void setViews(List<Event> list, HttpServletRequest httpServletRequest) {
+        String uri;
+        String eventPrefix = "/events/";
+        HashMap<String, Event> map = new HashMap<>();
+        for (Event event : list) {
+            uri = eventPrefix + event.getId();
+            map.put(uri, event);
+            statsClient.createHit(httpServletRequest, uri);
+        }
+        HitResponseDto[] hitResponseDtos =
+                statsClient.getHits(null, null, new ArrayList<>(map.keySet()), false).getBody();
+
+        if (hitResponseDtos != null && !(hitResponseDtos.length ==0)) {
+            for (HitResponseDto hitResponseDto : hitResponseDtos) {
+                if (map.containsKey(hitResponseDto.getUri())) {
+                    map.get(hitResponseDto.getUri()).setEventViews(hitResponseDto.getHits());
                 }
             }
         }
-
-
     }
+
+
+//    private void setViewsOld(List<Event> list, HttpServletRequest httpServletRequest) {
+//
+//        List<HitResponseDto> hitResponseDtos =
+//                statsClient.getHits(null, null, List.of(httpServletRequest.getRequestURI()), false).getBody();
+//        for (Event event : list) {
+//            if (hitResponseDtos != null && !hitResponseDtos.isEmpty()) {
+//                for (HitResponseDto dto : hitResponseDtos) {
+//                    if (dto.getUri().equals(httpServletRequest.getRequestURI())) {
+//                        event.setEventViews(dto.getHits());
+//                        //   hitResponseDtos.remove(dto);
+//                    }
+//                }
+//            }
+//        }
+//
+//
+//    }
+
 
     @Override
     public List<EventResponseDto> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
@@ -309,14 +350,19 @@ public class EventServiceImpl implements EventService {
         List<Event> list = eventRepository.findEventsPublic(text, categories, paid, startTime, endTime,
                 offsetBasedPageRequest);
 
-        statsClient.createHit(httpServletRequest);
-        setConfirmedRequestsAndViews(list, httpServletRequest);
-
         if (onlyAvailable) {
             list.removeIf(event -> (event.getEventConfirmedRequests() >= event.getEventLimit() &&
                     event.getEventLimit() != 0));
         }
 
+
+        // Получаем ConfirmedRequests
+        setConfirmedRequests(list, httpServletRequest);
+
+        setViews(list, httpServletRequest);
+
+
+        statsClient.createHit(httpServletRequest);
         return list.stream()
                 .map(EventMapper::toEventResponseDto)
                 .collect(Collectors.toList());

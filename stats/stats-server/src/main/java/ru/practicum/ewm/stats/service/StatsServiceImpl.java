@@ -9,6 +9,7 @@ import ru.practicum.ewm.stats.repository.StatsRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,7 +24,13 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<HitResponseDto> get(String start, String end, List<String> uris, boolean unique) {
+    public List<HitResponseDto> get(String start, String end, List<String> urisInc, boolean unique) {
+        List<String> uris = new ArrayList<>();
+        if (urisInc != null) {
+            for (String u : urisInc) {
+                uris.add(u.replaceAll("[]\\[]", ""));
+            }
+        }
 
         LocalDateTime startTime = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LocalDateTime endTime = LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -32,12 +39,12 @@ public class StatsServiceImpl implements StatsService {
             if (uris == null || uris.isEmpty()) {
                 return statsRepository.findAllUniqueHits(startTime, endTime);
             }
-            return statsRepository.findAllUniqueHitsByUri(startTime, endTime, uris);
+            return statsRepository.findAllUniqueHitsByUriIn(startTime, endTime, uris);
         } else {
             if (uris == null || uris.isEmpty()) {
                 return statsRepository.findAllHits(startTime, endTime);
             }
-            return statsRepository.findAllHitsByUri(startTime, endTime, uris);
+            return statsRepository.findAllHitsByUriIn(startTime, endTime, uris);
         }
     }
 }

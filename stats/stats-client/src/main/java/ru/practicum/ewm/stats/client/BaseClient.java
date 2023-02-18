@@ -1,6 +1,5 @@
 package ru.practicum.ewm.stats.client;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -10,7 +9,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.ewm.stats.dto.HitResponseDto;
 
-import java.util.List;
 import java.util.Map;
 
 public class BaseClient {
@@ -20,18 +18,14 @@ public class BaseClient {
         this.rest = rest;
     }
 
-    protected ResponseEntity<List<HitResponseDto>> get(String path, Map<String, Object> parameters) {
+    protected ResponseEntity<HitResponseDto[]> get(String path, Map<String, Object> parameters) {
         return makeAndSendGetRequest(path, parameters);
     }
 
-    private <T> ResponseEntity<List<HitResponseDto>> makeAndSendGetRequest(String path,
-                                                                           Map<String, Object> parameters) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(new HttpHeaders());
-        ParameterizedTypeReference<List<HitResponseDto>> typeRef = new ParameterizedTypeReference<>() {
-        };
-        ResponseEntity<List<HitResponseDto>> response;
+    private <T> ResponseEntity<HitResponseDto[]> makeAndSendGetRequest(String path, Map<String, Object> parameters) {
+        ResponseEntity<HitResponseDto[]> response;
         try {
-            response = rest.exchange(path, HttpMethod.GET, requestEntity, typeRef, parameters);
+            response = rest.getForEntity(path, HitResponseDto[].class, parameters);
 
         } catch (HttpStatusCodeException e) {
             throw new RuntimeException("Network error");
@@ -39,8 +33,8 @@ public class BaseClient {
         return prepareGetResponse(response);
     }
 
-    private static ResponseEntity<List<HitResponseDto>> prepareGetResponse(
-            ResponseEntity<List<HitResponseDto>> response) {
+    private static ResponseEntity<HitResponseDto[]> prepareGetResponse(
+            ResponseEntity<HitResponseDto[]> response) {
         if (response.getStatusCode().is2xxSuccessful()) {
             return response;
         }
