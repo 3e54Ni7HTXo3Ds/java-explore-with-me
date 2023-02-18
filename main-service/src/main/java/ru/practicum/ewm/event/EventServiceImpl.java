@@ -87,7 +87,7 @@ public class EventServiceImpl implements EventService {
                 new OffsetBasedPageRequest(from, size, Sort.by("id"));
 
         List<Event> list = eventRepository.findAllByEventInitiatorId(userId, offsetBasedPageRequest);
-        addConfirmedRequests(list, httpServletRequest);
+        addConfirmedRequests(list);
         addViews(list, httpServletRequest);
 
         return list.stream()
@@ -102,8 +102,8 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundParameterException("Wrong event"));
 
-        statsClient.createHit(httpServletRequest);
-        addConfirmedRequests(List.of(event), httpServletRequest);
+
+        addConfirmedRequests(List.of(event));
         addViews(List.of(event), httpServletRequest);
 
         return toEventResponseDto(eventRepository.save(event));
@@ -115,7 +115,8 @@ public class EventServiceImpl implements EventService {
             throws IncorrectParameterException, ConflictException {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IncorrectParameterException("Event with id=" + eventId + " was not found"));
-        addConfirmedRequests(List.of(event), httpServletRequest);
+        addConfirmedRequests(List.of(event));
+        addViews(List.of(event), httpServletRequest);
 
         String annotation = eventRequestDtoUpdate.getAnnotation();
         Long category = eventRequestDtoUpdate.getCategory();
@@ -233,7 +234,8 @@ public class EventServiceImpl implements EventService {
         List<Event> list =
                 eventRepository.findEventsAdmin(users, states, categories, startTime, endTime, offsetBasedPageRequest);
 
-        addConfirmedRequests(list, httpServletRequest);
+        addConfirmedRequests(list);
+        addViews(list, httpServletRequest);
 
         return list.stream()
                 .map(EventMapper::toEventResponseDto)
@@ -276,8 +278,7 @@ public class EventServiceImpl implements EventService {
                     event.getEventLimit() != 0));
         }
 
-        addConfirmedRequests(list, httpServletRequest);
-
+        addConfirmedRequests(list);
         addViews(list, httpServletRequest);
 
         if ("VIEWS".equals(sort)) {
@@ -361,7 +362,7 @@ public class EventServiceImpl implements EventService {
         return requestResponseDtoShort;
     }
 
-    private void addConfirmedRequests(List<Event> list, HttpServletRequest httpServletRequest) {
+    private void addConfirmedRequests(List<Event> list) {
 
         List<Request> confirmedList =
                 requestRepository.getAllByEventInAndStatusIn(list, List.of(RequestState.CONFIRMED.toString()));
@@ -382,7 +383,8 @@ public class EventServiceImpl implements EventService {
 
     private void addViews(List<Event> list, HttpServletRequest httpServletRequest) {
 
-        if (!httpServletRequest.getRequestURI().matches("^.*\\d$")) {         // проставляем хит для events
+        if ((httpServletRequest != null) &&
+                !httpServletRequest.getRequestURI().matches("^.*\\d$")) {         // проставляем хит для events
             statsClient.createHit(httpServletRequest);
         }
 
@@ -394,7 +396,9 @@ public class EventServiceImpl implements EventService {
             for (Event event : list) {
                 uri = eventPrefix + event.getId();
                 uriAndEvent.put(uri, event);
-                statsClient.createHit(httpServletRequest, uri);
+                if (httpServletRequest != null) {
+                    statsClient.createHit(httpServletRequest, uri);
+                }
             }
         }
 
@@ -406,6 +410,10 @@ public class EventServiceImpl implements EventService {
                 if (uriAndEvent.containsKey(hitResponseDto.getUri())) {
                     uriAndEvent.get(hitResponseDto.getUri()).setEventViews(hitResponseDto.getHits());
                 }
+            }
+        } else {
+            for (Event event : list) {
+                event.setEventViews(0L);
             }
         }
     }

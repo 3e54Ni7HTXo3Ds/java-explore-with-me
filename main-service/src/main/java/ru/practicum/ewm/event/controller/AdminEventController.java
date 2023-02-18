@@ -28,10 +28,9 @@ public class AdminEventController {
     @PatchMapping(path = "/{eventId}")
     public EventResponseDto updateEventAdmin(
             @Positive @PathVariable Long eventId,
-            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate, HttpServletRequest httpServletRequest
-    )
+            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate)
             throws IncorrectParameterException, ConflictException {
-        return eventService.updateEvent(null, eventId, eventRequestDtoUpdate, true, httpServletRequest);
+        return eventService.updateEvent(null, eventId, eventRequestDtoUpdate, true, null);
     }
 
     @GetMapping

@@ -52,18 +52,17 @@ public class PrivateEventController {
     @GetMapping(path = "/{eventId}")
     public EventResponseDto getEvent(
             @Positive @PathVariable Long userId,
-            @Positive @PathVariable Long eventId,
-            HttpServletRequest httpServletRequest) throws NotFoundParameterException {
-        return eventService.getEvent(userId, eventId, httpServletRequest);
+            @Positive @PathVariable Long eventId) throws NotFoundParameterException {
+        return eventService.getEvent(userId, eventId, null);
     }
 
     @PatchMapping(path = "/{eventId}")
     public EventResponseDto updateEvent(
             @Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId,
-            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate, HttpServletRequest httpServletRequest)
+            @Valid @RequestBody EventRequestDtoUpdate eventRequestDtoUpdate)
             throws IncorrectParameterException, ConflictException {
-        return eventService.updateEvent(userId, eventId, eventRequestDtoUpdate, false, httpServletRequest);
+        return eventService.updateEvent(userId, eventId, eventRequestDtoUpdate, false, null);
     }
 
     @GetMapping(path = "/{eventId}/requests")
