@@ -56,7 +56,6 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
     private final RequestRepository requestRepository;
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd HH:mm:ss");
-
     private final StatsClient statsClient;
 
     @Override
@@ -255,7 +254,6 @@ public class EventServiceImpl implements EventService {
         LocalDateTime startTime;
         LocalDateTime endTime;
 
-
         if (rangeStart != null) {
             startTime = LocalDateTime.parse(rangeStart, dateTimeFormatter);
         } else {
@@ -367,17 +365,12 @@ public class EventServiceImpl implements EventService {
         if (list != null && !list.isEmpty()) {
             List<Request> confirmedList =
                     requestRepository.getAllByEventInAndStatusIn(list, List.of(RequestState.CONFIRMED.toString()));
-
-            long eventConfirmedRequests;
             if (confirmedList != null && !confirmedList.isEmpty()) {
-                for (Event event : list) {
-                    eventConfirmedRequests = 0L;
-                    for (Request request : confirmedList) {
-                        if (request.getEvent().equals(event)) {
-                            eventConfirmedRequests++;
-                        }
-                    }
-                    event.setEventConfirmedRequests(eventConfirmedRequests);
+                Map<Event, Long> events = confirmedList.stream()
+                        .collect(Collectors.groupingBy(Request::getEvent, Collectors.counting()));
+
+                for (Event event : events.keySet()) {
+                    event.setEventConfirmedRequests(events.get(event));
                 }
             }
         }
@@ -404,7 +397,7 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        HitResponseDto[] hitResponseDtos =                                            // запрашиваем статистику по листу
+        HitResponseDto[] hitResponseDtos =                                            // запрашиваем статистику по списку
                 statsClient.getHits(null, null, new ArrayList<>(uriAndEvent.keySet()), false).getBody();
 
         if (hitResponseDtos != null && !(hitResponseDtos.length == 0)) {              //проставляем событиям просмотры
