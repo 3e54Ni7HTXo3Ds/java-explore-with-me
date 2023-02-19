@@ -31,7 +31,6 @@ import ru.practicum.ewm.stats.dto.HitResponseDto;
 import ru.practicum.ewm.user.UserRepository;
 import ru.practicum.ewm.user.model.User;
 
-import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,7 +46,7 @@ import static ru.practicum.ewm.request.RequestMapper.toRequestDto;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
-@PersistenceContext
+
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
