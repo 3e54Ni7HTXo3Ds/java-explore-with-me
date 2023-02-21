@@ -11,6 +11,7 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findAllByCommentatorIdOrderByDateDesc(Long userId, OffsetBasedPageRequest offsetBasedPageRequest);
+
     List<Comment> findAllByEventIdOrderByDateDesc(Long eventId, OffsetBasedPageRequest offsetBasedPageRequest);
 
     List<Comment> findAllByTextContainingOrderByDateDesc(String text, OffsetBasedPageRequest offsetBasedPageRequest);
