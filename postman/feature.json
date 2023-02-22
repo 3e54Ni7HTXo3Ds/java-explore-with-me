@@ -338,7 +338,7 @@
 									"\r",
 									"    pm.test(\"Должен быть найден только один комментарий по заданному фильтру\", function () {\r",
 									"    pm.expect(target.length).to.eql(1);\r",
-									"    pm.expect(target[0].id).equal(pm.collectionVariables.get('commId'));\r",
+									"    pm.expect(target[0].id).equal(parseInt(pm.collectionVariables.get('commId')));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -868,8 +868,8 @@
 									"    pm.test(\"Должен быть найден только один комментарий по заданному фильтру\", function () {\r",
 									"            pm.expect(target[0].id).to.not.be.null;\r",
 									"            pm.expect(target[1].id).to.not.be.null;\r",
-									"          pm.expect(target[0].event).equal(pm.collectionVariables.get(\"eid\"));\r",
-									"          pm.expect(target[1].event).equal(pm.collectionVariables.get(\"eid\"));\r",
+									"          pm.expect(target[0].event).equal(parseInt(pm.collectionVariables.get(\"eid\")));\r",
+									"          pm.expect(target[1].event).equal(parseInt(pm.collectionVariables.get(\"eid\")));\r",
 									"});"
 								],
 								"type": "text/javascript"
