@@ -983,10 +983,9 @@
 									"source = pm.collectionVariables.get('response');\r",
 									"commId = pm.collectionVariables.get('commId');\r",
 									"\r",
-									"pm.test(\"Комментарий должен быть найден до выполнения запроса\", function(){\r",
-									"   pm.expect(source).not.to.be.null;\r",
-									"   pm.expect(source.id).to.eql(parseInt(commId));\r",
-									"     \r",
+									"pm.test(\"Комментарий должен быть найден до выполнения запроса\", function () {\r",
+									"    pm.expect(source).not.to.be.null;\r",
+									"    pm.expect(source.id).equal(commId, 'Идентификтор комментария должен совпадать с удаляемым');\r",
 									"});\r",
 									"\r",
 									"pm.sendRequest({\r",
@@ -1113,11 +1112,9 @@
 									"source = pm.collectionVariables.get('response');\r",
 									"commId = pm.collectionVariables.get('commId');\r",
 									"\r",
-									"pm.test(\"Комментарий должен быть найден до выполнения запроса\", function(){\r",
-									"   pm.expect(source).not.to.be.null;\r",
-									"   pm.expect(source.id).to.eql(parseInt(commId));\r",
-									" \r",
-									"     \r",
+									"pm.test(\"Комментарий должен быть найден до выполнения запроса\", function () {\r",
+									"    pm.expect(source).not.to.be.null;\r",
+									"    pm.expect(source.id).equal(commId, 'Идентификтор комментария должен совпадать с удаляемым');\r",
 									"});\r",
 									"\r",
 									"pm.sendRequest({\r",
@@ -1387,6 +1384,11 @@
 		},
 		{
 			"key": "searchText",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "source",
 			"value": "",
 			"type": "string"
 		}
