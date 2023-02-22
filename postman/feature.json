@@ -338,7 +338,7 @@
 									"\r",
 									"    pm.test(\"Должен быть найден только один комментарий по заданному фильтру\", function () {\r",
 									"    pm.expect(target.length).to.eql(1);\r",
-									"    pm.expect(target[0].id).equal(pm.collectionVariables.get(parceInt(\"commId\")));\r",
+									"    pm.expect(target[0].id).equal(pm.collectionVariables.get('commId'));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -728,7 +728,7 @@
 									"});\r",
 									"\r",
 									"const target = pm.response.json();\r",
-									"const source = pm.collectionVariables.get('response');\r",
+									"const source = pm.collectionVariables.get(\"response\");\r",
 									"\r",
 									"\r",
 									"pm.test(\"Комментарий должен содержать поля: id, text, commentator, event, date\", function () {\r",
@@ -741,7 +741,7 @@
 									"\r",
 									"    pm.test(\"Должен быть найден только один комментарий по заданному фильтру\", function () {\r",
 									"            pm.expect(target.id).to.not.be.null;\r",
-									"            pm.expect(source.id).equal(parceInt(target.id));\r",
+									"            pm.expect(source.id).equal(target.id);\r",
 									"\r",
 									"});"
 								],
