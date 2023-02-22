@@ -231,12 +231,10 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "http://localhost:8080/users/:userId/comments?from=0&size=10",
-							"protocol": "http",
+							"raw": "{{baseUrl}}/users/:userId/comments?from=0&size=10",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "8080",
 							"path": [
 								"users",
 								":userId",
@@ -340,7 +338,7 @@
 									"\r",
 									"    pm.test(\"Должен быть найден только один комментарий по заданному фильтру\", function () {\r",
 									"    pm.expect(target.length).to.eql(1);\r",
-									"    pm.expect(target[0].id).equal(pm.collectionVariables.get(\"commId\"));\r",
+									"    pm.expect(target[0].id).equal(pm.collectionVariables.get(parceInt(\"commId\")));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -369,12 +367,10 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "http://localhost:8080/admin/comments?from=0&size=10&text={{searchText}}",
-							"protocol": "http",
+							"raw": "{{baseUrl}}/admin/comments?from=0&size=10&text={{searchText}}",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "8080",
 							"path": [
 								"admin",
 								"comments"
@@ -695,7 +691,6 @@
 									"        event = await api.publishEvent(event.id);\r",
 									"        const comment = await api.addComment(user.id, event.id, rnd.getComment());\r",
 									"        pm.collectionVariables.set(\"response\", comment); \r",
-									"\r",
 									"        pm.collectionVariables.set(\"commId\", comment.id);\r",
 									"       \r",
 									"\r",
@@ -746,7 +741,7 @@
 									"\r",
 									"    pm.test(\"Должен быть найден только один комментарий по заданному фильтру\", function () {\r",
 									"            pm.expect(target.id).to.not.be.null;\r",
-									"            pm.expect(source.id).equal(target.id);\r",
+									"            pm.expect(source.id).equal(parceInt(target.id));\r",
 									"\r",
 									"});"
 								],
@@ -776,12 +771,10 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "http://localhost:8080/comments/:commId",
-							"protocol": "http",
+							"raw": "{{baseUrl}}/comments/:commId",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "8080",
 							"path": [
 								"comments",
 								":commId"
@@ -905,12 +898,10 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "http://localhost:8080/comments/events/:eventId",
-							"protocol": "http",
+							"raw": "{{baseUrl}}/comments/events/:eventId",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "8080",
 							"path": [
 								"comments",
 								"events",
