@@ -12,6 +12,7 @@ import ru.practicum.ewm.error.exceptions.NotFoundParameterException;
 import ru.practicum.ewm.event.EventRepository;
 import ru.practicum.ewm.event.OffsetBasedPageRequest;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.user.UserRepository;
 import ru.practicum.ewm.user.model.User;
 
@@ -38,8 +39,10 @@ public class CommentServiceImpl implements CommentService {
             throws NotFoundParameterException {
         User commentator =
                 userRepository.findById(userId).orElseThrow(() -> new NotFoundParameterException("Wrong user"));
-        Event event =
-                eventRepository.findById(eventId).orElseThrow(() -> new NotFoundParameterException("Wrong event"));
+        Event event = eventRepository.findByIdAndEventState(eventId, EventState.PUBLISHED.toString());
+        if (event == null) {
+            throw new NotFoundParameterException("Wrong event or not PUBLISHED");
+        }
         Comment comment = toComment(commentRequestDto, commentator, event);
         return toCommentResponseDto(commentRepository.save(comment));
     }
@@ -77,7 +80,7 @@ public class CommentServiceImpl implements CommentService {
             throw new ConflictException("Its not your comment");
         }
         comment.setText(commentRequestDto.getText());
-        comment.setDate(LocalDateTime.now());
+        comment.setLastDate(LocalDateTime.now());
         return toCommentResponseDto(commentRepository.save(comment));
     }
 
@@ -110,7 +113,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundParameterException("Wrong comment"));
         comment.setText(commentRequestDto.getText());
-        comment.setDate(LocalDateTime.now());
+        comment.setLastDate(LocalDateTime.now());
         return toCommentResponseDto(commentRepository.save(comment));
     }
 

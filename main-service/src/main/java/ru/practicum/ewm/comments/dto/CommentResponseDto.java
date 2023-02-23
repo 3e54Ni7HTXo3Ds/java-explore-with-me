@@ -12,4 +12,5 @@ public class CommentResponseDto {
     private Long commentator;//
     private Long event;//
     private String date;//
+    private String lastDate;//
 }

@@ -21,7 +21,8 @@ public class CommentMapper {
                 commentRequestDto.getText(),
                 user,
                 event,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null
         );
     }
 
@@ -31,7 +32,8 @@ public class CommentMapper {
                 comment.getText(),
                 comment.getCommentator().getId(),
                 comment.getEvent().getId(),
-                dateTimeFormatter.format(comment.getDate())
+                dateTimeFormatter.format(comment.getDate()),
+                comment.getLastDate() == null ? null : dateTimeFormatter.format(comment.getLastDate())
         );
     }
 }

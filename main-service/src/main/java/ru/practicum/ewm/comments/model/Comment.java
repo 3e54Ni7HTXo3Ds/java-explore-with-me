@@ -37,6 +37,9 @@ public class Comment {
     @Column(name = "comment_date")
     private LocalDateTime date;//
 
+    @Column(name = "comment_last_change_date")
+    private LocalDateTime lastDate;//
+
 }
 
 
